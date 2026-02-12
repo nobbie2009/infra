@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Configuration
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -9,6 +10,10 @@ print_header() {
     echo "================================"
     echo "$1"
     echo "================================"
+}
+
+print_error() {
+    echo "❌ $1"
 }
 
 setup_git() {
@@ -79,28 +84,64 @@ main() {
         
         # Verify again
         if ! check_credentials; then
-            echo "❌ Authentication failed. Please check your token and try again."
+            print_error "Authentication failed. Please check your token and try again."
             exit 1
         fi
     fi
 
     # 3. Fetch and Pull
     echo "Fetching updates from GitHub..."
-    git fetch origin
+    if ! git fetch origin; then
+        print_error "Failed to fetch from remote."
+        exit 1
+    fi
 
     echo "Status of local changes:"
     echo "------------------------"
     git status -s
     echo "------------------------"
 
-    read -p "Do you want to pull updates? This might overwrite local changes. (y/n) " -n 1 -r
+    read -p "Do you want to pull updates? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo "Pulling updates..."
-        git pull origin master
+        
+        # Check for local changes that would be overwritten
+        if ! git diff-index --quiet HEAD --; then
+             echo "⚠️  You have local changes or untracked files."
+             read -p "Do you want to FORCE reset and lose local changes? (y/N) " -n 1 -r
+             echo
+             if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo "Resetting local changes..."
+                git reset --hard origin/master
+                git clean -fd
+             else
+                echo "Attempting standard pull..."
+                if ! git pull origin master; then
+                    print_error "Pull failed due to conflicts. Please fix them manually or run with force option."
+                    exit 1
+                fi
+             fi
+        else
+             echo "Pulling updates..."
+             if ! git pull origin master; then
+                print_error "Pull failed."
+                exit 1
+             fi
+        fi
         
         echo "Rebuilding containers..."
-        docker compose up -d --build
+        # Try docker compose link, fall back to docker-compose
+        if command -v docker-compose &> /dev/null; then
+            if ! docker-compose up -d --build; then
+                print_error "Docker build failed."
+                exit 1
+            fi
+        else
+             if ! docker compose up -d --build; then
+                print_error "Docker build failed."
+                exit 1
+            fi
+        fi
         
         echo "✅ Update complete!"
     else
