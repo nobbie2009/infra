@@ -1,9 +1,11 @@
-import PdfPrinter from 'pdfmake';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const PdfPrinter = require('pdfmake');
 import { ProxmoxService } from './ProxmoxService';
 import { ProjectService } from './ProjectService';
 import { HealthCheckService } from './HealthCheckService';
 import { AlertService } from './AlertService';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
+import path from 'path';
 
 export class ReportService {
     private proxmoxService: ProxmoxService;
@@ -35,14 +37,13 @@ export class ReportService {
 
         const fonts = {
             Roboto: {
-                normal: 'Helvetica', // Fallback to standard PDF fonts if allowed, otherwise need paths
-                bold: 'Helvetica-Bold',
-                italics: 'Helvetica-Oblique',
-                bolditalics: 'Helvetica-BoldOblique',
+                normal: path.join(process.cwd(), 'node_modules/pdfmake/fonts/Roboto/Roboto-Regular.ttf'),
+                bold: path.join(process.cwd(), 'node_modules/pdfmake/fonts/Roboto/Roboto-Medium.ttf'),
+                italics: path.join(process.cwd(), 'node_modules/pdfmake/fonts/Roboto/Roboto-Italic.ttf'),
+                bolditalics: path.join(process.cwd(), 'node_modules/pdfmake/fonts/Roboto/Roboto-MediumItalic.ttf'),
             },
         };
 
-        // @ts-ignore
         this.printer = new PdfPrinter(fonts);
     }
 
