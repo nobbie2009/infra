@@ -2,7 +2,7 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-ENV BUILD_TIMESTAMP=2026-02-12-214000
+ENV BUILD_TIMESTAMP=2026-02-12-214500
 
 # Copy package files
 COPY package*.json ./

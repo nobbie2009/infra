@@ -207,7 +207,7 @@ async function bootstrap() {
     credentialsRoutes.post(
       '/:id/test',
       jwtMiddleware.authenticate(userRepository),
-      (req: AuthRequest, res: Response) => credentialsController.test(req, res)
+      (req: AuthRequest, res: Response) => credentialsController.testConnection(req, res)
     );
 
     credentialsRoutes.delete(

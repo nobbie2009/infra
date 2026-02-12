@@ -19,7 +19,7 @@ export class CredentialsController {
    * POST /api/credentials/:id/test
    * Test a credential connection
    */
-  async test(req: AuthRequest, res: Response): Promise<void> {
+  async testConnection(req: AuthRequest, res: Response): Promise<void> {
     try {
       if (!req.user) {
         res.status(401).json({
