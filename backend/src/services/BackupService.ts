@@ -14,8 +14,8 @@ export class BackupService {
     private scriptPath: string;
 
     constructor() {
-        this.backupDir = path.resolve(__dirname, '../../../backups');
-        this.scriptPath = path.resolve(__dirname, '../../../scripts/backup.sh');
+        this.backupDir = path.join(process.cwd(), 'backups');
+        this.scriptPath = path.join(process.cwd(), 'scripts/backup.sh');
 
         // Ensure backup directory exists
         if (!fs.existsSync(this.backupDir)) {

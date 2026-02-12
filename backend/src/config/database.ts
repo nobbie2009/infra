@@ -5,6 +5,7 @@ import { VM } from '../entities/VM.entity';
 import { Service } from '../entities/Service.entity';
 import { Project } from '../entities/Project.entity';
 import { Feature } from '../entities/Feature.entity';
+import { Alert } from '../entities/Alert.entity';
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -15,7 +16,7 @@ const AppDataSource = new DataSource({
   database: process.env.DB_NAME || 'inframanager',
   synchronize: process.env.NODE_ENV !== 'production',
   logging: process.env.NODE_ENV !== 'production',
-  entities: [User, Credential, VM, Service, Project, Feature],
+  entities: [User, Credential, VM, Service, Project, Feature, Alert],
   subscribers: [],
   migrations: [],
   ssl:
