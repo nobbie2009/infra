@@ -106,6 +106,7 @@ async function bootstrap() {
     const proxmoxService = new ProxmoxService(credentialRepository);
     const githubService = new GitHubService(projectRepository, credentialRepository);
     const credentialsService = new CredentialsService(credentialRepository);
+    // Initialize controller with all required dependencies
     const credentialsController = new CredentialsController(credentialsService, proxmoxService, githubService);
     const proxmoxController = new ProxmoxController(proxmoxService);
     const healthCheckService = new HealthCheckService(serviceRepository);
