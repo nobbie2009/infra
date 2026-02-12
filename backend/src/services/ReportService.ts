@@ -1,5 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const PdfPrinter = require('pdfmake');
+const PdfPrinterModule = require('pdfmake/js/Printer');
+const PdfPrinter = PdfPrinterModule.default || PdfPrinterModule;
 import { ProxmoxService } from './ProxmoxService';
 import { ProjectService } from './ProjectService';
 import { HealthCheckService } from './HealthCheckService';
@@ -44,10 +45,20 @@ export class ReportService {
             },
         };
 
-        this.printer = new PdfPrinter(fonts);
+        try {
+            this.printer = new PdfPrinter(fonts);
+        } catch (error) {
+            console.error('Failed to initialize PdfPrinter:', error);
+            // Fallback or leave printer undefined, handled in generate method
+            this.printer = null;
+        }
     }
 
     async generateInfrastructureReport(): Promise<Buffer> {
+        if (!this.printer) {
+            throw new Error('PDF Generation service is not available (initialization failed)');
+        }
+
         // 1. Collect Data
         const [vms, nodes, projects, alerts, systemHealth] = await Promise.all([
             this.proxmoxService.getAllVMs(),
