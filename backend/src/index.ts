@@ -150,7 +150,7 @@ async function bootstrap() {
     );
     const promptsController = new PromptsController(contextCollector, promptService);
 
-    const adminController = new AdminController(alertService, proxmoxService, userRepository);
+    const adminController = new AdminController(alertService, proxmoxService, userRepository, healthCheckService);
 
     const jwtMiddleware = new JWTMiddleware(userRepository);
 

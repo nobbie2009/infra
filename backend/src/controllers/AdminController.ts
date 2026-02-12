@@ -3,13 +3,15 @@ import { AlertService } from '../services/AlertService';
 import { ProxmoxService } from '../services/ProxmoxService';
 import { Repository } from 'typeorm';
 import { User } from '../entities/User.entity';
+import { HealthCheckService } from '../services/HealthCheckService';
 import * as os from 'os';
 
 export class AdminController {
     constructor(
         private alertService: AlertService,
         private proxmoxService: ProxmoxService,
-        private userRepository: Repository<User>
+        private userRepository: Repository<User>,
+        private healthCheckService: HealthCheckService
     ) { }
 
     /**
@@ -17,31 +19,7 @@ export class AdminController {
      */
     async getSystemStats(req: Request, res: Response) {
         try {
-            const cpus = os.cpus();
-            const totalMem = os.totalmem();
-            const freeMem = os.freemem();
-            const usedMem = totalMem - freeMem;
-
-            // Helper to get average CPU load
-            const loadAvg = os.loadavg();
-
-            const stats = {
-                hostname: os.hostname(),
-                platform: os.platform(),
-                uptime: os.uptime(),
-                cpu: {
-                    cores: cpus.length,
-                    model: cpus[0].model,
-                    loadAvg: loadAvg
-                },
-                memory: {
-                    total: totalMem,
-                    free: freeMem,
-                    used: usedMem,
-                    percentUsed: Math.round((usedMem / totalMem) * 100)
-                }
-            };
-
+            const stats = await this.healthCheckService.getSystemStats();
             res.json({ success: true, data: stats });
         } catch (error: any) {
             res.status(500).json({ success: false, message: error.message });

@@ -296,12 +296,14 @@ export class HealthCheckService {
         cores: cpus.length,
         model: cpus[0].model,
         load: loadAvg[0], // 1 min avg
+        loadAvg: loadAvg
       },
       memory: {
         total: totalMem,
         free: freeMem,
         used: usedMem,
-        percentage: Math.round((usedMem / totalMem) * 100)
+        percentage: Math.round((usedMem / totalMem) * 100),
+        percentUsed: Math.round((usedMem / totalMem) * 100)
       }
     };
   }

@@ -138,12 +138,12 @@ const AdminDashboard: React.FC = () => {
                                 <div className="mt-4">
                                     <div className="flex justify-between mb-1">
                                         <span className="text-sm font-medium text-blue-700">Load Average</span>
-                                        <span className="text-sm font-medium text-blue-700">{stats.cpu.load.toFixed(1)}%</span>
+                                        <span className="text-sm font-medium text-blue-700">{stats.cpu?.load?.toFixed(1) ?? '0.0'}%</span>
                                     </div>
                                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                                         <div
                                             className="bg-blue-600 h-2.5 rounded-full"
-                                            style={{ width: `${Math.min(stats.cpu.load, 100)}%` }}
+                                            style={{ width: `${Math.min(stats.cpu?.load ?? 0, 100)}%` }}
                                         ></div>
                                     </div>
                                 </div>
@@ -171,12 +171,12 @@ const AdminDashboard: React.FC = () => {
                                 </div>
                                 <div className="mt-4">
                                     <div className="flex justify-between mb-1">
-                                        <span className="text-sm font-medium text-purple-700">Used ({stats.memory.percentage.toFixed(1)}%)</span>
+                                        <span className="text-sm font-medium text-purple-700">Used ({stats.memory?.percentage?.toFixed(1) ?? '0.0'}%)</span>
                                     </div>
                                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                                         <div
                                             className="bg-purple-600 h-2.5 rounded-full"
-                                            style={{ width: `${stats.memory.percentage}%` }}
+                                            style={{ width: `${stats.memory?.percentage ?? 0}%` }}
                                         ></div>
                                     </div>
                                 </div>
