@@ -9,6 +9,7 @@ COPY package*.json ./
 RUN npm install
 
 # Copy source code
+ENV BUILD_TIMESTAMP=2026-02-12-213500
 COPY . .
 
 # Build TypeScript
