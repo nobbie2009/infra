@@ -8,7 +8,7 @@ import { ProxmoxService } from '../services/ProxmoxService';
 import { GitHubService } from '../services/GitHubService';
 
 export class CredentialsController {
-  // Constructor requires 3 services as of latest update
+  // Constructor requires 3 services as of latest update (forced refresh)
   constructor(
     private credentialsService: CredentialsService,
     private proxmoxService: ProxmoxService,
