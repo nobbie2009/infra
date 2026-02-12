@@ -9,6 +9,7 @@ import VMDashboard from './pages/VMDashboard';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import Kanban from './pages/Kanban';
+import PromptGenerator from './pages/PromptGenerator';
 import { MainLayout } from './components/MainLayout';
 
 const App: React.FC = () => {
@@ -81,6 +82,17 @@ const App: React.FC = () => {
               <PrivateRoute>
                 <MainLayout>
                   <Kanban />
+                </MainLayout>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/prompts/generate/:contextType/:contextId"
+            element={
+              <PrivateRoute>
+                <MainLayout>
+                  <PromptGenerator />
                 </MainLayout>
               </PrivateRoute>
             }

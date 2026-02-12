@@ -174,6 +174,16 @@ const Kanban: React.FC = () => {
                                                                             <button
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
+                                                                                    navigate(`/prompts/generate/feature/${feature.id}`);
+                                                                                }}
+                                                                                className="text-gray-300 hover:text-blue-500 transition-colors"
+                                                                                title="AI Prompt generieren"
+                                                                            >
+                                                                                <span className="text-xs">🤖</span>
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
                                                                                     if (window.confirm('Feature löschen?')) {
                                                                                         api.delete(`/features/${feature.id}`).then(() => loadData());
                                                                                     }

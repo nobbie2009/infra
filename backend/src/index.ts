@@ -22,6 +22,9 @@ import { ProjectService } from './services/ProjectService';
 import { FeatureController } from './controllers/FeatureController';
 import { FeatureService } from './services/FeatureService';
 import { GitHubService } from './services/GitHubService';
+import { PromptService } from './services/PromptService';
+import { ContextCollectorService } from './services/ContextCollectorService';
+import { PromptsController } from './controllers/PromptsController';
 import logger from './utils/logger';
 
 const app: Express = express();
@@ -126,6 +129,15 @@ async function bootstrap() {
 
     const featureService = new FeatureService(featureRepository);
     const featureController = new FeatureController(featureService);
+
+    const promptService = new PromptService();
+    const contextCollector = new ContextCollectorService(
+      projectService,
+      featureService,
+      ipManagementService,
+      proxmoxService
+    );
+    const promptsController = new PromptsController(contextCollector, promptService);
 
     const jwtMiddleware = new JWTMiddleware(userRepository);
 
@@ -450,6 +462,17 @@ async function bootstrap() {
     );
 
     app.use('/api/features', featureRoutes);
+
+    // Prompt Routes
+    const promptRoutes = express.Router();
+
+    promptRoutes.post(
+      '/generate',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => promptsController.generate(req, res)
+    );
+
+    app.use('/api/prompts', promptRoutes);
 
     // API Info endpoint
     app.get('/api', (req: Request, res: Response) => {
