@@ -6,21 +6,19 @@ import Backups from './Backups';
 import Documentation from './Documentation';
 
 interface SystemStats {
+    hostname: string;
+    platform: string;
+    uptime: number;
     cpu: {
-        load: number;
+        cores: number;
         model: string;
+        load: number;
     };
     memory: {
         total: number;
         free: number;
         used: number;
         percentage: number;
-    };
-    os: {
-        platform: string;
-        distro: string;
-        hostname: string;
-        uptime: number;
     };
 }
 
@@ -109,15 +107,15 @@ const AdminDashboard: React.FC = () => {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-500">Hostname</span>
-                                    <span className="font-mono text-gray-900">{stats.os.hostname}</span>
+                                    <span className="font-mono text-gray-900">{stats.hostname}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-500">OS</span>
-                                    <span className="text-gray-900">{stats.os.distro} ({stats.os.platform})</span>
+                                    <span className="text-gray-500">Platform</span>
+                                    <span className="text-gray-900">{stats.platform}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-500">Uptime</span>
-                                    <span className="text-gray-900">{formatUptime(stats.os.uptime)}</span>
+                                    <span className="text-gray-900">{formatUptime(stats.uptime)}</span>
                                 </div>
                             </div>
                         ) : (

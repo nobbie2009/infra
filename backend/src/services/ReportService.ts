@@ -150,15 +150,20 @@ export class ReportService {
         };
 
         // 3. Create PDF
-        return new Promise((resolve, reject) => {
+        // 3. Create PDF
+        return new Promise(async (resolve, reject) => {
             const chunks: any[] = [];
-            const pdfDoc = this.printer.createPdfKitDocument(docDefinition);
+            try {
+                const pdfDoc = await this.printer.createPdfKitDocument(docDefinition);
 
-            pdfDoc.on('data', (chunk: any) => chunks.push(chunk));
-            pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
-            pdfDoc.on('error', (err: any) => reject(err));
+                pdfDoc.on('data', (chunk: any) => chunks.push(chunk));
+                pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
+                pdfDoc.on('error', (err: any) => reject(err));
 
-            pdfDoc.end();
+                pdfDoc.end();
+            } catch (error) {
+                reject(error);
+            }
         });
     }
 }
