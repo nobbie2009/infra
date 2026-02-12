@@ -126,35 +126,35 @@ export class JWTMiddleware {
       }
     };
   };
-}
 
-/**
- * Role-based authorization middleware
- */
-export function authorize(...roles: string[]) {
-  return (req: AuthRequest, res: Response, next: NextFunction): void => {
-    if (!req.user) {
-      res.status(401).json({
-        success: false,
-        message: 'Authentication required',
-      });
-      return;
-    }
+  /**
+   * Role-based authorization middleware
+   */
+  authorize = (roles: string[]) => {
+    return (req: AuthRequest, res: Response, next: NextFunction): void => {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          message: 'Authentication required',
+        });
+        return;
+      }
 
-    if (!roles.includes(req.user.role)) {
-      logger.warn('Unauthorized access attempt', {
-        userId: req.user.id,
-        userRole: req.user.role,
-        requiredRoles: roles,
-      });
+      if (!roles.includes(req.user.role)) {
+        logger.warn('Unauthorized access attempt', {
+          userId: req.user.id,
+          userRole: req.user.role,
+          requiredRoles: roles,
+        });
 
-      res.status(403).json({
-        success: false,
-        message: 'Insufficient permissions',
-      });
-      return;
-    }
+        res.status(403).json({
+          success: false,
+          message: 'Insufficient permissions',
+        });
+        return;
+      }
 
-    next();
+      next();
+    };
   };
 }

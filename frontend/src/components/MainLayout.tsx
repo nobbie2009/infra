@@ -55,10 +55,30 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                                     <span className="hidden md:inline">{item.name}</span>
                                 </button>
                             ))}
+                            {user?.role === 'admin' && (
+                                <button
+                                    onClick={() => navigate('/admin')}
+                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${location.pathname.startsWith('/admin')
+                                        ? 'bg-purple-100 text-purple-700'
+                                        : 'text-gray-600 hover:bg-gray-100'
+                                        }`}
+                                >
+                                    <span>🛡️</span>
+                                    <span className="hidden md:inline">Admin</span>
+                                </button>
+                            )}
                         </nav>
                     </div>
 
                     <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => navigate('/admin')}
+                            className="p-2 text-gray-400 hover:text-gray-500 relative"
+                            title="Alerts"
+                        >
+                            <span className="text-xl">🔔</span>
+                            {/* <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" /> */}
+                        </button>
                         <div className="hidden md:block text-right">
                             <p className="text-sm font-medium text-gray-900">{user?.username || 'User'}</p>
                             <p className="text-xs text-gray-500">{user?.role || 'Guest'}</p>

@@ -1,0 +1,96 @@
+import { Request, Response } from 'express';
+import { AlertService } from '../services/AlertService';
+import { ProxmoxService } from '../services/ProxmoxService';
+import { Repository } from 'typeorm';
+import { User } from '../entities/User.entity';
+import * as os from 'os';
+
+export class AdminController {
+    constructor(
+        private alertService: AlertService,
+        private proxmoxService: ProxmoxService,
+        private userRepository: Repository<User>
+    ) { }
+
+    /**
+     * Get system statistics (CPU, RAM, Disk)
+     */
+    async getSystemStats(req: Request, res: Response) {
+        try {
+            const cpus = os.cpus();
+            const totalMem = os.totalmem();
+            const freeMem = os.freemem();
+            const usedMem = totalMem - freeMem;
+
+            // Helper to get average CPU load
+            const loadAvg = os.loadavg();
+
+            const stats = {
+                hostname: os.hostname(),
+                platform: os.platform(),
+                uptime: os.uptime(),
+                cpu: {
+                    cores: cpus.length,
+                    model: cpus[0].model,
+                    loadAvg: loadAvg
+                },
+                memory: {
+                    total: totalMem,
+                    free: freeMem,
+                    used: usedMem,
+                    percentUsed: Math.round((usedMem / totalMem) * 100)
+                }
+            };
+
+            res.json({ success: true, data: stats });
+        } catch (error: any) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    /**
+     * Get all active alerts
+     */
+    async getAlerts(req: Request, res: Response) {
+        try {
+            const alerts = await this.alertService.getActiveAlerts();
+            res.json({ success: true, data: alerts });
+        } catch (error: any) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    /**
+     * Acknowledge an alert
+     */
+    async acknowledgeAlert(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const userId = (req as any).user.id;
+
+            const alert = await this.alertService.acknowledgeAlert(id, userId);
+
+            if (!alert) {
+                return res.status(404).json({ success: false, message: 'Alert not found' });
+            }
+
+            res.json({ success: true, data: alert });
+        } catch (error: any) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    /**
+     * List all users (Admin only)
+     */
+    async getUsers(req: Request, res: Response) {
+        try {
+            const users = await this.userRepository.find({
+                select: ['id', 'username', 'role', 'created_at', 'last_login']
+            });
+            res.json({ success: true, data: users });
+        } catch (error: any) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
+}

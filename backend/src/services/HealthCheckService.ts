@@ -3,6 +3,8 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { Repository } from 'typeorm';
 import { Service, HealthStatus } from '../entities/Service.entity';
+import { AlertService } from './AlertService';
+import { AlertType, AlertSeverity } from '../entities/Alert.entity';
 import logger from '../utils/logger';
 
 const execAsync = promisify(exec);
@@ -15,7 +17,10 @@ export interface HealthCheckResult {
 }
 
 export class HealthCheckService {
-  constructor(private serviceRepository: Repository<Service>) {}
+  constructor(
+    private serviceRepository: Repository<Service>,
+    private alertService: AlertService
+  ) { }
 
   /**
    * Perform health check on a service
@@ -31,18 +36,22 @@ export class HealthCheckService {
     }
 
     const startTime = Date.now();
+    let result: HealthCheckResult;
 
     try {
       switch (service.protocol) {
         case 'http':
         case 'https':
-          return await this.checkHTTP(service, startTime);
+          result = await this.checkHTTP(service, startTime);
+          break;
         case 'tcp':
-          return await this.checkTCP(service, startTime);
+          result = await this.checkTCP(service, startTime);
+          break;
         case 'udp':
-          return await this.checkUDP(service, startTime);
+          result = await this.checkUDP(service, startTime);
+          break;
         default:
-          return await this.checkTCP(service, startTime);
+          result = await this.checkTCP(service, startTime);
       }
     } catch (error) {
       const responseTime = Date.now() - startTime;
@@ -52,13 +61,33 @@ export class HealthCheckService {
         serviceName: service.name,
       });
 
-      return {
+      result = {
         status: HealthStatus.UNHEALTHY,
         responseTime,
         message: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date(),
       };
     }
+
+    // Alerting Logic
+    const alertKey = `service-down-${service.id}`;
+    if (result.status === HealthStatus.UNHEALTHY) {
+      if (service.failed_count && service.failed_count >= 2) { // Only alert after 3 consecutive failures (2 previous + current)
+        await this.alertService.createAlert(
+          AlertType.SERVICE,
+          AlertSeverity.CRITICAL,
+          `Service Unhealthy: ${service.name}`,
+          `Service ${service.name} on ${service.vm?.name || 'unknown host'} is unreachable. Error: ${result.message}`,
+          `Service:${service.name}`,
+          alertKey
+        );
+      }
+    } else if (result.status === HealthStatus.HEALTHY) {
+      // Auto-resolve alert if exists
+      await this.alertService.resolveAlertByKey(alertKey);
+    }
+
+    return result;
   }
 
   /**

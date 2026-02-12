@@ -6,13 +6,16 @@ import { AuthController } from './controllers/AuthController';
 import { ProxmoxController } from './controllers/ProxmoxController';
 import { InfrastructureController } from './controllers/InfrastructureController';
 import { CredentialsController } from './controllers/CredentialsController';
+import { AdminController } from './controllers/AdminController';
 import { JWTMiddleware, AuthRequest } from './middleware/jwt.middleware';
 import { ProxmoxService } from './services/ProxmoxService';
 import { IPManagementService } from './services/IPManagementService';
 import { HealthCheckService } from './services/HealthCheckService';
 import { CredentialsService } from './services/CredentialsService';
+import { AlertService } from './services/AlertService';
 import { User } from './entities/User.entity';
 import { Credential } from './entities/Credential.entity';
+import { Alert } from './entities/Alert.entity';
 import { VM } from './entities/VM.entity';
 import { Service } from './entities/Service.entity';
 import { Project } from './entities/Project.entity';
@@ -112,7 +115,11 @@ async function bootstrap() {
     // Initialize controller with all required dependencies
     const credentialsController = new CredentialsController(credentialsService, proxmoxService, githubService);
     const proxmoxController = new ProxmoxController(proxmoxService);
-    const healthCheckService = new HealthCheckService(serviceRepository);
+
+    const alertRepository = AppDataSource.getRepository(Alert);
+    const alertService = new AlertService(alertRepository);
+
+    const healthCheckService = new HealthCheckService(serviceRepository, alertService);
     const ipManagementService = new IPManagementService(
       vmRepository,
       serviceRepository,
@@ -138,6 +145,8 @@ async function bootstrap() {
       proxmoxService
     );
     const promptsController = new PromptsController(contextCollector, promptService);
+
+    const adminController = new AdminController(alertService, proxmoxService, userRepository);
 
     const jwtMiddleware = new JWTMiddleware(userRepository);
 
@@ -473,6 +482,37 @@ async function bootstrap() {
     );
 
     app.use('/api/prompts', promptRoutes);
+
+    // Admin Routes
+    const adminRoutes = express.Router();
+
+    adminRoutes.get(
+      '/system/stats',
+      jwtMiddleware.authenticate(userRepository),
+      jwtMiddleware.authorize(['admin']),
+      (req: AuthRequest, res: Response) => adminController.getSystemStats(req, res)
+    );
+
+    adminRoutes.get(
+      '/alerts',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => adminController.getAlerts(req, res)
+    );
+
+    adminRoutes.post(
+      '/alerts/:id/ack',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => adminController.acknowledgeAlert(req, res)
+    );
+
+    adminRoutes.get(
+      '/users',
+      jwtMiddleware.authenticate(userRepository),
+      jwtMiddleware.authorize(['admin']),
+      (req: AuthRequest, res: Response) => adminController.getUsers(req, res)
+    );
+
+    app.use('/api/admin', adminRoutes);
 
     // API Info endpoint
     app.get('/api', (req: Request, res: Response) => {

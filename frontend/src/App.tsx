@@ -10,6 +10,7 @@ import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
 import Kanban from './pages/Kanban';
 import PromptGenerator from './pages/PromptGenerator';
+import AdminDashboard from './pages/AdminDashboard';
 import { MainLayout } from './components/MainLayout';
 
 const App: React.FC = () => {
@@ -93,6 +94,17 @@ const App: React.FC = () => {
               <PrivateRoute>
                 <MainLayout>
                   <PromptGenerator />
+                </MainLayout>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute>
+                <MainLayout>
+                  <AdminDashboard />
                 </MainLayout>
               </PrivateRoute>
             }
