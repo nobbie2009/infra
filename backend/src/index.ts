@@ -7,12 +7,16 @@ import { ProxmoxController } from './controllers/ProxmoxController';
 import { InfrastructureController } from './controllers/InfrastructureController';
 import { CredentialsController } from './controllers/CredentialsController';
 import { AdminController } from './controllers/AdminController';
+import { BackupController } from './controllers/BackupController';
 import { JWTMiddleware, AuthRequest } from './middleware/jwt.middleware';
 import { ProxmoxService } from './services/ProxmoxService';
 import { IPManagementService } from './services/IPManagementService';
 import { HealthCheckService } from './services/HealthCheckService';
 import { CredentialsService } from './services/CredentialsService';
 import { AlertService } from './services/AlertService';
+import { BackupService } from './services/BackupService';
+import { ReportService } from './services/ReportService';
+import { ReportController } from './controllers/ReportController';
 import { User } from './entities/User.entity';
 import { Credential } from './entities/Credential.entity';
 import { Alert } from './entities/Alert.entity';
@@ -486,6 +490,10 @@ async function bootstrap() {
     // Admin Routes
     const adminRoutes = express.Router();
 
+    // Backup Controller
+    const backupService = new BackupService();
+    const backupController = new BackupController(backupService);
+
     adminRoutes.get(
       '/system/stats',
       jwtMiddleware.authenticate(userRepository),
@@ -512,7 +520,50 @@ async function bootstrap() {
       (req: AuthRequest, res: Response) => adminController.getUsers(req, res)
     );
 
+    // Backup Routes
+    adminRoutes.get(
+      '/backups',
+      jwtMiddleware.authenticate(userRepository),
+      jwtMiddleware.authorize(['admin']),
+      (req: AuthRequest, res: Response) => backupController.list(req, res)
+    );
+
+    adminRoutes.post(
+      '/backups',
+      jwtMiddleware.authenticate(userRepository),
+      jwtMiddleware.authorize(['admin']),
+      (req: AuthRequest, res: Response) => backupController.create(req, res)
+    );
+
+    adminRoutes.delete(
+      '/backups/:filename',
+      jwtMiddleware.authenticate(userRepository),
+      jwtMiddleware.authorize(['admin']),
+      (req: AuthRequest, res: Response) => backupController.delete(req, res)
+    );
+
+    adminRoutes.get(
+      '/backups/:filename/download',
+      jwtMiddleware.authenticate(userRepository),
+      jwtMiddleware.authorize(['admin']),
+      (req: AuthRequest, res: Response) => backupController.download(req, res)
+    );
+
     app.use('/api/admin', adminRoutes);
+
+    // Report Routes
+    const reportService = new ReportService(proxmoxService, projectService, healthCheckService, alertService);
+    const reportController = new ReportController(reportService);
+
+    const reportRoutes = express.Router();
+
+    reportRoutes.get(
+      '/infrastructure/summary',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => reportController.getInfrastructureSummary(req, res)
+    );
+
+    app.use('/api/reports', reportRoutes);
 
     // API Info endpoint
     app.get('/api', (req: Request, res: Response) => {

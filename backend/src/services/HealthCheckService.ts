@@ -6,6 +6,7 @@ import { Service, HealthStatus } from '../entities/Service.entity';
 import { AlertService } from './AlertService';
 import { AlertType, AlertSeverity } from '../entities/Alert.entity';
 import logger from '../utils/logger';
+import * as os from 'os';
 
 const execAsync = promisify(exec);
 
@@ -274,6 +275,34 @@ export class HealthCheckService {
       totalChecks,
       failedChecks,
       lastCheckTime: service.last_check || null,
+    };
+  }
+
+  /**
+   * Get system statistics (CPU, RAM)
+   */
+  async getSystemStats(): Promise<any> {
+    const cpus = os.cpus();
+    const totalMem = os.totalmem();
+    const freeMem = os.freemem();
+    const usedMem = totalMem - freeMem;
+    const loadAvg = os.loadavg();
+
+    return {
+      hostname: os.hostname(),
+      platform: os.platform(),
+      uptime: os.uptime(),
+      cpu: {
+        cores: cpus.length,
+        model: cpus[0].model,
+        load: loadAvg[0], // 1 min avg
+      },
+      memory: {
+        total: totalMem,
+        free: freeMem,
+        used: usedMem,
+        percentage: Math.round((usedMem / totalMem) * 100)
+      }
     };
   }
 }

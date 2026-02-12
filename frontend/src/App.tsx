@@ -11,6 +11,7 @@ import ProjectDetail from './pages/ProjectDetail';
 import Kanban from './pages/Kanban';
 import PromptGenerator from './pages/PromptGenerator';
 import AdminDashboard from './pages/AdminDashboard';
+import Reports from './pages/Reports';
 import { MainLayout } from './components/MainLayout';
 
 const App: React.FC = () => {
@@ -105,6 +106,17 @@ const App: React.FC = () => {
               <PrivateRoute>
                 <MainLayout>
                   <AdminDashboard />
+                </MainLayout>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/reports"
+            element={
+              <PrivateRoute>
+                <MainLayout>
+                  <Reports />
                 </MainLayout>
               </PrivateRoute>
             }

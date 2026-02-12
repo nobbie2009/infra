@@ -27,6 +27,21 @@ export class ProjectService {
     }
 
     /**
+     * Get all projects (Admin)
+     */
+    async getAllProjectsAdmin(): Promise<Project[]> {
+        try {
+            return await this.projectRepository.find({
+                relations: ['vms'],
+                order: { updated_at: 'DESC' },
+            });
+        } catch (error) {
+            logger.error('Failed to get all projects', { error: String(error) });
+            return [];
+        }
+    }
+
+    /**
      * Get project by ID
      */
     async getProjectById(userId: string, id: string): Promise<Project | null> {
