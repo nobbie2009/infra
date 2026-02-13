@@ -21,8 +21,8 @@ export class ReportController {
 
             res.send(pdfBuffer);
         } catch (error: any) {
-            logger.error('Failed to generate report', { error });
-            res.status(500).json({ success: false, message: 'Failed to generate report' });
+            console.error('Report Generation Error:', error);
+            res.status(500).json({ success: false, message: error.message || 'Failed to generate report' });
         }
     }
 }

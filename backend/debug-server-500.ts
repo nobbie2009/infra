@@ -1,10 +1,10 @@
+
 import 'dotenv/config';
 import { AlertService } from './src/services/AlertService';
 import { BackupService } from './src/services/BackupService';
 import { ReportService } from './src/services/ReportService';
 import AppDataSource from './src/config/database';
 import { Alert } from './src/entities/Alert.entity';
-import { User } from './src/entities/User.entity';
 import path from 'path';
 import fs from 'fs';
 
@@ -26,8 +26,13 @@ const mockHealth = {
     }),
 } as any;
 
+// Mock AlertService fallback
+const mockAlertService = {
+    getActiveAlerts: async () => []
+} as any;
+
 async function debugbackend() {
-    console.log('--- Starting Deep Debug ---');
+    console.log('--- Starting Deep Debug (With DB) ---');
 
     // 1. Database Connection
     try {
@@ -37,50 +42,44 @@ async function debugbackend() {
         }
     } catch (e: any) {
         console.error('❌ Database connection failed:', e.message);
-        process.exit(1);
+        // We continue to test ReportService even if DB fails, using mock
     }
 
     // 2. Test AlertService (Entity Check)
+    let realAlertService = null;
     try {
-        const repo = AppDataSource.getRepository(Alert);
-        const service = new AlertService(repo);
-        const alerts = await service.getActiveAlerts();
-        console.log(`✅ AlertService: Found ${alerts.length} active alerts`);
+        if (AppDataSource.isInitialized) {
+            const repo = AppDataSource.getRepository(Alert);
+            realAlertService = new AlertService(repo);
+            const alerts = await realAlertService.getActiveAlerts();
+            console.log(`✅ AlertService: Found ${alerts.length} active alerts`);
+        }
     } catch (e: any) {
         console.error('❌ AlertService Failed:', e.message);
         console.error(e);
     }
 
-    // 3. Test BackupService (Script Execution)
+    // 3. Test BackupService
     try {
         const service = new BackupService();
         console.log('Testing Backup Listing...');
         const backups = await service.listBackups();
         console.log(`✅ BackupService: Found ${backups.length} backups`);
-
-        // Only test backup creation if env allows (might fail on windows without pg_dump)
-        // console.log('Testing Backup Creation...');
-        // await service.createBackup();
-        // console.log('✅ BackupService: Creation successful');
     } catch (e: any) {
         console.error('❌ BackupService Failed:', e.message);
     }
 
     // 4. Test ReportService (PDF Generation)
     try {
-        // Re-instantiate AlertService for ReportService
-        const alertRepo = AppDataSource.getRepository(Alert);
-        const alertService = new AlertService(alertRepo);
-
-        const reportService = new ReportService(
+        const service = new ReportService(
             mockProxmox,
             mockProject,
             mockHealth,
-            alertService
+            realAlertService || mockAlertService
         );
 
         console.log('Testing PDF Generation...');
-        const buffer = await reportService.generateInfrastructureReport();
+        const buffer = await service.generateInfrastructureReport();
         console.log(`✅ PDF Generated: ${buffer.length} bytes`);
 
         fs.writeFileSync('debug-report.pdf', buffer);
@@ -88,10 +87,9 @@ async function debugbackend() {
 
     } catch (e: any) {
         console.error('❌ ReportService Failed:', e.message);
-        if (e.message.includes('font')) {
+        if (e.message.includes('font') || e.code === 'ENOENT') {
             console.error('   Possible Font Path Issue');
             console.log('   CWD:', process.cwd());
-            // Check paths
             const fontPath = path.join(process.cwd(), 'node_modules/pdfmake/fonts/Roboto/Roboto-Regular.ttf');
             console.log(`   Checking path: ${fontPath} -> Exists? ${fs.existsSync(fontPath)}`);
         }

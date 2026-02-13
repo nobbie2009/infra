@@ -60,13 +60,28 @@ export class ReportService {
         }
 
         // 1. Collect Data
-        const [vms, nodes, projects, alerts, systemHealth] = await Promise.all([
-            this.proxmoxService.getAllVMs(),
-            this.proxmoxService.getNodes(),
-            this.projectService.getAllProjectsAdmin(),
-            this.alertService.getActiveAlerts(),
-            this.healthCheckService.getSystemStats(),
-        ]);
+        // 1. Collect Data with specific error handling
+        let vms, nodes, projects, alerts, systemHealth;
+
+        try {
+            vms = await this.proxmoxService.getAllVMs();
+        } catch (e: any) { throw new Error(`Proxmox VMs failed: ${e.message}`); }
+
+        try {
+            nodes = await this.proxmoxService.getNodes();
+        } catch (e: any) { throw new Error(`Proxmox Nodes failed: ${e.message}`); }
+
+        try {
+            projects = await this.projectService.getAllProjectsAdmin();
+        } catch (e: any) { throw new Error(`Project Service failed: ${e.message}`); }
+
+        try {
+            alerts = await this.alertService.getActiveAlerts();
+        } catch (e: any) { throw new Error(`Alert Service failed: ${e.message}`); }
+
+        try {
+            systemHealth = await this.healthCheckService.getSystemStats();
+        } catch (e: any) { throw new Error(`Health Service failed: ${e.message}`); }
 
         // 2. Define PDF Document
         const docDefinition: TDocumentDefinitions = {
