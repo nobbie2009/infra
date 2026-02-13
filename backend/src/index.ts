@@ -32,6 +32,7 @@ import { GitHubService } from './services/GitHubService';
 import { PromptService } from './services/PromptService';
 import { ContextCollectorService } from './services/ContextCollectorService';
 import { PromptsController } from './controllers/PromptsController';
+import { ChatbotController } from './controllers/ChatbotController';
 import logger from './utils/logger';
 
 const app: Express = express();
@@ -569,6 +570,30 @@ async function bootstrap() {
     );
 
     app.use('/api/reports', reportRoutes);
+
+    // ChatBot Routes
+    const chatbotController = new ChatbotController();
+    const chatbotRoutes = express.Router();
+
+    chatbotRoutes.post(
+      '/query',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => chatbotController.query(req, res)
+    );
+
+    chatbotRoutes.get(
+      '/history',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => chatbotController.getHistory(req, res)
+    );
+
+    chatbotRoutes.post(
+      '/confirm',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => chatbotController.confirm(req, res)
+    );
+
+    app.use('/api/chatbot', chatbotRoutes);
 
     // API Info endpoint
     app.get('/api', (req: Request, res: Response) => {
