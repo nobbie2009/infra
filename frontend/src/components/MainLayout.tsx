@@ -25,6 +25,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         { name: 'Projekte', path: '/projects', icon: '📁' },
         { name: 'VMs', path: '/vms', icon: '🖥️' },
         { name: 'Credentials', path: '/credentials', icon: '🔐' },
+        { name: 'ChatBot', path: '/chatbot', icon: '🤖' },
         { name: 'Reports', path: '/reports', icon: '📊' },
     ];
 

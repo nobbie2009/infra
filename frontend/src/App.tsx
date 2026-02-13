@@ -12,6 +12,7 @@ import Kanban from './pages/Kanban';
 import PromptGenerator from './pages/PromptGenerator';
 import AdminDashboard from './pages/AdminDashboard';
 import Reports from './pages/Reports';
+import ChatBot from './pages/ChatBot';
 import { MainLayout } from './components/MainLayout';
 
 const App: React.FC = () => {
@@ -117,6 +118,17 @@ const App: React.FC = () => {
               <PrivateRoute>
                 <MainLayout>
                   <Reports />
+                </MainLayout>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/chatbot"
+            element={
+              <PrivateRoute>
+                <MainLayout>
+                  <ChatBot />
                 </MainLayout>
               </PrivateRoute>
             }
