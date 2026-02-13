@@ -71,4 +71,26 @@ export class AdminController {
             res.status(500).json({ success: false, message: error.message });
         }
     }
+    /**
+     * Debug Filesystem (Temporary)
+     */
+    async debugFS(req: Request, res: Response) {
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const debugInfo = {
+                cwd: process.cwd(),
+                env: process.env,
+                filesInCwd: fs.readdirSync(process.cwd()),
+                nodeModulesExists: fs.existsSync(path.join(process.cwd(), 'node_modules')),
+                nodeModulesPdfmake: fs.existsSync(path.join(process.cwd(), 'node_modules/pdfmake')) ? 'exists' : 'missing',
+                fontsPath: path.join(process.cwd(), 'node_modules/pdfmake/fonts/Roboto/Roboto-Regular.ttf'),
+                fontsPathExists: fs.existsSync(path.join(process.cwd(), 'node_modules/pdfmake/fonts/Roboto/Roboto-Regular.ttf')),
+                scriptsValues: fs.existsSync(path.join(process.cwd(), 'scripts')) ? fs.readdirSync(path.join(process.cwd(), 'scripts')) : 'missing scripts dir'
+            };
+            res.json({ success: true, data: debugInfo });
+        } catch (error: any) {
+            res.status(500).json({ success: false, message: error.message });
+        }
+    }
 }

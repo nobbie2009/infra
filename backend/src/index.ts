@@ -549,6 +549,11 @@ async function bootstrap() {
       (req: AuthRequest, res: Response) => backupController.download(req, res)
     );
 
+    adminRoutes.get(
+      '/debug/fs',
+      (req: Request, res: Response) => adminController.debugFS(req, res)
+    );
+
     app.use('/api/admin', adminRoutes);
 
     // Report Routes

@@ -48,6 +48,7 @@ services:
     volumes:
       - ./backend/src:/app/src
       - ./backend/logs:/app/logs
+      - ./backend/scripts:/app/scripts
     healthcheck:
       test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://127.0.0.1:5000/health']
       interval: 10s
