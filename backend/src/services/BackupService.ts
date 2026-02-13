@@ -59,7 +59,8 @@ export class BackupService {
 
             // On Windows development without WSL, .sh scripts won't run directly via exec easily without bash.
             // For development robustness, strict check.
-            const command = process.platform === 'win32' ? `bash "${this.scriptPath}"` : `"${this.scriptPath}"`;
+            // Use bash explicitly to avoid chmod +x requirement
+            const command = `bash "${this.scriptPath}"`;
 
             exec(command, (error, stdout, stderr) => {
                 if (error) {
