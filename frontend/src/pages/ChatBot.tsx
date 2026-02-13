@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, AlertCircle, CheckCircle, Loader } from 'lucide-react';
-import { api } from '../config/api';
+import { api } from '../lib/api';
 import ChatMessage from '../components/ChatMessage';
 import ConfirmationDialog from '../components/ConfirmationDialog';
 
