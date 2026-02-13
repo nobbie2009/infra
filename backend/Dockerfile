@@ -10,6 +10,9 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install
 
+# Install system dependencies (bash for scripts, postgresql-client for backups)
+RUN apk add --no-cache bash postgresql-client
+
 # Copy source code
 ENV BUILD_TIMESTAMP=2026-02-12-220000
 COPY . .
