@@ -45,16 +45,16 @@ export default function ChatMessage({ message }: { message: Message }) {
               ul: ({ children }) => <ul className="list-disc list-inside my-1">{children}</ul>,
               ol: ({ children }) => <ol className="list-decimal list-inside my-1">{children}</ol>,
               li: ({ children }) => <li className="ml-2">{children}</li>,
-              code: ({ inline, children }) =>
-                inline ? (
-                  <code className="bg-gray-200 px-2 py-1 rounded text-sm font-mono">
-                    {children}
-                  </code>
-                ) : (
-                  <code className="block bg-gray-900 text-gray-100 p-3 rounded my-1 text-xs font-mono overflow-x-auto">
-                    {children}
-                  </code>
-                ),
+              code: ({ children }) => (
+                <code className="bg-gray-200 px-2 py-1 rounded text-sm font-mono">
+                  {children}
+                </code>
+              ),
+              pre: ({ children }) => (
+                <pre className="block bg-gray-900 text-gray-100 p-3 rounded my-1 text-xs font-mono overflow-x-auto">
+                  {children}
+                </pre>
+              ),
               table: ({ children }) => (
                 <table className="border-collapse border border-gray-300 text-xs my-1">
                   {children}

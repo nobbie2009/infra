@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { api } from '../lib/api';
+import api from '../lib/api';
 
 export interface ChatMessage {
   id?: string;
