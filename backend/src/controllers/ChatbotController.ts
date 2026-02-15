@@ -42,9 +42,17 @@ export class ChatbotController {
   private conversationHistory: Map<string, any[]> = new Map();
 
   constructor() {
-    this.claudeClient = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY || '',
-    });
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+
+    if (!apiKey || apiKey.includes('YOUR-API-KEY')) {
+      logger.error('ANTHROPIC_API_KEY not configured or using placeholder');
+      throw new Error(
+        'ANTHROPIC_API_KEY environment variable is not configured. ' +
+        'Get your API key from https://console.anthropic.com and set it in .env'
+      );
+    }
+
+    this.claudeClient = new Anthropic({ apiKey });
   }
 
   private getSystemPrompt(): string {
