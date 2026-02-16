@@ -22,13 +22,16 @@ export class ProxmoxService {
    */
   async initialize(userId: string, credentialId?: string): Promise<boolean> {
     try {
-      // Find Proxmox credential
+      // Find Proxmox credential (get the newest one)
       const credential = await this.credentialRepository.findOne({
         where: {
           user_id: userId,
           type: CredentialType.PROXMOX,
           ...(credentialId && { id: credentialId }),
         },
+        order: {
+          updated_at: 'DESC'
+        }
       });
 
       if (!credential) {
@@ -74,12 +77,24 @@ export class ProxmoxService {
 
       // Create client
       const endpoint = credentialData.endpoint || process.env.PROXMOX_API_ENDPOINT;
-      const token = credentialData.token || credentialData.value; // Handle 'value' field too
+      let token = credentialData.token || credentialData.value; // Handle 'value' field too
       const node = credentialData.node || process.env.PROXMOX_NODE || 'pve';
 
       if (!endpoint || !token) {
         logger.error('Invalid Proxmox credential data', { hasEndpoint: !!endpoint, hasToken: !!token, keys: Object.keys(credentialData) });
         throw new Error(`Invalid Proxmox credential data. Missing endpoint or token. Found keys: ${Object.keys(credentialData).join(', ')}`);
+      }
+
+      // Sanitize token (remove PVEAPIToken= prefix if present)
+      token = token.trim();
+      if (token.startsWith('PVEAPIToken=')) {
+        token = token.replace('PVEAPIToken=', '').trim();
+        logger.info('Sanitized Proxmox token: removed PVEAPIToken= prefix');
+      }
+
+      // Validate format roughly (User@Realm!TokenId=UUID)
+      if (!token.includes('@') || !token.includes('!') || !token.includes('=')) {
+        logger.warn(`Proxmox token format looks suspicious (expected User@Realm!Id=Secret): ${token.substring(0, 10)}...`);
       }
 
       // Log masked token for debugging (safety first)
