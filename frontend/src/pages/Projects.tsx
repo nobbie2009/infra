@@ -128,23 +128,26 @@ const Projects: React.FC = () => {
                             </div>
 
                             <div className="flex justify-between items-start mb-4">
-                                <div className="h-12 w-12 bg-blue-50 rounded-2xl flex items-center justify-center text-2? shadow-inner">
-                                    🚀
-                                </div>
+                                <div></div>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => handleSync(project.id)}
                                         disabled={syncingId === project.id}
-                                        className={`p-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors ${syncingId === project.id ? 'animate-spin' : ''}`}
+                                        className={`px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-colors ${syncingId === project.id ? 'animate-spin' : ''}`}
                                         title="Von GitHub synchronisieren"
                                     >
-                                        🔄
+                                        {syncingId === project.id ? '⏳ Wird synchronisiert...' : '🔄 Aktualisieren'}
                                     </button>
                                     <button
-                                        onClick={() => navigate(`/projects/${project.id}`)}
-                                        className="p-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors"
+                                        onClick={() => {
+                                            navigate(`/projects/${project.id}`);
+                                            // Store state to open databases tab
+                                            sessionStorage.setItem('openDatabasesTab', 'true');
+                                        }}
+                                        className="px-4 py-2 rounded-lg bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors"
+                                        title="Direkt zur Datenbank"
                                     >
-                                        👁️
+                                        🗄️ Datenbank
                                     </button>
                                 </div>
                             </div>

@@ -49,6 +49,11 @@ const ProjectDetail: React.FC = () => {
     useEffect(() => {
         if (id) {
             loadProject();
+            // Check if we should open the databases tab
+            if (sessionStorage.getItem('openDatabasesTab')) {
+                setActiveTab('databases');
+                sessionStorage.removeItem('openDatabasesTab');
+            }
         }
     }, [id]);
 
