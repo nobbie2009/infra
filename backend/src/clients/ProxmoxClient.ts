@@ -274,6 +274,10 @@ export class ProxmoxClient {
             address: ipv4,
             address6: ipv6
           };
+        }).filter((iface: ProxmoxNetworkInterface) => {
+          // Filter out loopback and non-IP interfaces
+          const isLoopback = iface.iface === 'lo' || (iface.address && iface.address.startsWith('127.'));
+          return !isLoopback && (iface.address || iface.address6);
         });
       } catch (agentError) {
         // Fallback or just ignore if agent not running
