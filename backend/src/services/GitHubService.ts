@@ -58,11 +58,35 @@ export class GitHubService {
                         token = decrypted.trim();
                     }
 
-                    // Validate token format
-                    if (!token || typeof token !== 'string' || !token.startsWith('ghp_')) {
-                        logger.warn(`Invalid token format in credential ${credential.id}`, { userId });
+                    // Validate token format - accept various GitHub token formats
+                    // ghp_ = Personal Access Token (new format)
+                    // gho_ = OAuth token
+                    // ghu_ = User-to-server token
+                    // ghs_ = Server-to-server token
+                    // ghr_ = Refresh token
+                    if (!token || typeof token !== 'string') {
+                        logger.warn(`Invalid token type in credential ${credential.id}`, {
+                            userId,
+                            tokenType: typeof token,
+                            decrypted: decrypted.substring(0, 50) + '...'
+                        });
                         continue; // Try next credential
                     }
+
+                    const trimmedToken = token.trim();
+                    const validTokenPrefixes = ['ghp_', 'gho_', 'ghu_', 'ghs_', 'ghr_'];
+                    const isValidToken = validTokenPrefixes.some(prefix => trimmedToken.startsWith(prefix));
+
+                    if (!isValidToken) {
+                        logger.warn(`Invalid token format in credential ${credential.id}`, {
+                            userId,
+                            tokenStart: trimmedToken.substring(0, 20),
+                            decrypted: decrypted.substring(0, 50) + '...'
+                        });
+                        continue; // Try next credential
+                    }
+
+                    token = trimmedToken;
 
                     logger.info(`Testing GitHub credential ${credential.id}`, { userId });
                     this.client = new GitHubClient(token);
