@@ -78,12 +78,11 @@ export class GitHubService {
                     const isValidToken = validTokenPrefixes.some(prefix => trimmedToken.startsWith(prefix));
 
                     if (!isValidToken) {
-                        logger.warn(`Invalid token format in credential ${credential.id}`, {
+                        logger.warn(`Unknown GitHub token format in credential ${credential.id} (Proceeding anyway)`, {
                             userId,
-                            tokenStart: trimmedToken.substring(0, 20),
-                            decrypted: decrypted.substring(0, 50) + '...'
+                            tokenStart: trimmedToken.substring(0, 15) + '...',
                         });
-                        continue; // Try next credential
+                        // Don't skip, try the token anyway as it might be a new format (e.g. github_pat_)
                     }
 
                     token = trimmedToken;
