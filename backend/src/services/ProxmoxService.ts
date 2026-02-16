@@ -82,6 +82,10 @@ export class ProxmoxService {
         throw new Error(`Invalid Proxmox credential data. Missing endpoint or token. Found keys: ${Object.keys(credentialData).join(', ')}`);
       }
 
+      // Log masked token for debugging (safety first)
+      const maskedToken = token.length > 10 ? `${token.substring(0, 5)}...${token.substring(token.length - 5)}` : '***';
+      logger.info(`Initializing Proxmox client with token: ${maskedToken} (Length: ${token.length})`);
+
       this.proxmoxClient = new ProxmoxClient(endpoint, token, node);
 
       // Test connection
