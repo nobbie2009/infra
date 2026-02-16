@@ -251,8 +251,36 @@ export class ProxmoxClient {
   /**
    * Get VM network interfaces and IPs
    */
+  /**
+   * Get VM network interfaces and IPs via QEMU Guest Agent
+   */
   async getVMNetwork(vmid: number, node: string = this.node): Promise<ProxmoxNetworkInterface[]> {
     try {
+      // Try QEMU Guest Agent first (most reliable for IPs)
+      try {
+        const response = await this.client.get(
+          `/api2/json/nodes/${node}/qemu/${vmid}/agent/network-get-interfaces`
+        );
+        const agentInterfaces = response.data.data.result || [];
+
+        // Transform agent format to current format
+        return agentInterfaces.map((iface: any) => {
+          const ipv4 = iface['ip-addresses']?.find((ip: any) => ip['ip-address-type'] === 'ipv4')?.['ip-address'];
+          const ipv6 = iface['ip-addresses']?.find((ip: any) => ip['ip-address-type'] === 'ipv6')?.['ip-address'];
+
+          return {
+            iface: iface.name,
+            type: 'agent',
+            address: ipv4,
+            address6: ipv6
+          };
+        });
+      } catch (agentError) {
+        // Fallback or just ignore if agent not running
+        logger.debug(`Agent network fetch failed for ${vmid} (Agent might not be running)`, { error: String(agentError) });
+      }
+
+      // Fallback to config/interfaces if agent fails (though this usually just gives MACs)
       const response = await this.client.get(
         `/api2/json/nodes/${node}/qemu/${vmid}/interfaces`
       );

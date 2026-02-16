@@ -294,6 +294,8 @@ export class ProxmoxService {
       const result: { ipv4?: string; ipv6?: string } = {};
 
       // Extract first IPv4 and IPv6 from network interfaces
+      logger.info(`[DEBUG] Network interfaces for VM ${vmid}:`, { network });
+
       for (const iface of network) {
         if (iface.address && !result.ipv4) {
           result.ipv4 = iface.address;
