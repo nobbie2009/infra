@@ -33,14 +33,14 @@ export class ProxmoxService {
 
       if (!credential) {
         logger.warn('No Proxmox credential found', { userId });
-        return false;
+        throw new Error('No Proxmox credential found');
       }
 
       // Decrypt credential
       const masterKey = process.env.ENCRYPTION_MASTER_KEY;
       if (!masterKey) {
         logger.error('ENCRYPTION_MASTER_KEY not set');
-        return false;
+        throw new Error('Server configuration error: Encryption key missing');
       }
 
       const decryptionInput: DecryptionInput = {
@@ -55,19 +55,31 @@ export class ProxmoxService {
       try {
         const decrypted = decrypt(decryptionInput);
         credentialData = JSON.parse(decrypted);
+
+        // Handle double stringification
+        if (typeof credentialData === 'string') {
+          try {
+            const parsed = JSON.parse(credentialData);
+            if (parsed && typeof parsed === 'object') {
+              credentialData = parsed;
+            }
+          } catch (ignore) {
+            // ignore
+          }
+        }
       } catch (error) {
         logger.error('Failed to decrypt Proxmox credential', { error: String(error) });
-        return false;
+        throw new Error('Failed to decrypt Proxmox credential');
       }
 
       // Create client
       const endpoint = credentialData.endpoint || process.env.PROXMOX_API_ENDPOINT;
-      const token = credentialData.token;
+      const token = credentialData.token || credentialData.value; // Handle 'value' field too
       const node = credentialData.node || process.env.PROXMOX_NODE || 'pve';
 
       if (!endpoint || !token) {
-        logger.error('Invalid Proxmox credential data', { hasEndpoint: !!endpoint, hasToken: !!token });
-        return false;
+        logger.error('Invalid Proxmox credential data', { hasEndpoint: !!endpoint, hasToken: !!token, keys: Object.keys(credentialData) });
+        throw new Error(`Invalid Proxmox credential data. Missing endpoint or token. Found keys: ${Object.keys(credentialData).join(', ')}`);
       }
 
       this.proxmoxClient = new ProxmoxClient(endpoint, token, node);
@@ -76,7 +88,7 @@ export class ProxmoxService {
       const connected = await this.proxmoxClient.testConnection();
       if (!connected) {
         logger.warn('Proxmox API connection test failed');
-        return false;
+        throw new Error('Proxmox API connection test failed. Check URL and Token.');
       }
 
       if (connected) {
@@ -86,8 +98,12 @@ export class ProxmoxService {
       }
       return connected;
     } catch (error) {
+      // Re-throw if it's already an Error object we created, otherwise wrap it
+      if (error instanceof Error) {
+        throw error;
+      }
       logger.error('Failed to initialize Proxmox client', { error: String(error) });
-      return false;
+      throw new Error(`Failed to initialize Proxmox client: ${String(error)}`);
     }
   }
 
