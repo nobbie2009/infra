@@ -255,44 +255,67 @@ export class ProxmoxClient {
    * Get VM network interfaces and IPs via QEMU Guest Agent
    */
   async getVMNetwork(vmid: number, node: string = this.node): Promise<ProxmoxNetworkInterface[]> {
+    let interfaces: ProxmoxNetworkInterface[] = [];
+
+    // 1. Try QEMU Guest Agent (Best for VMs)
     try {
-      // Try QEMU Guest Agent first (most reliable for IPs)
+      const response = await this.client.get(
+        `/api2/json/nodes/${node}/qemu/${vmid}/agent/network-get-interfaces`
+      );
+      const agentInterfaces = response.data.data.result || [];
+
+      interfaces = agentInterfaces.map((iface: any) => {
+        const ipv4 = iface['ip-addresses']?.find((ip: any) => ip['ip-address-type'] === 'ipv4')?.['ip-address'];
+        const ipv6 = iface['ip-addresses']?.find((ip: any) => ip['ip-address-type'] === 'ipv6')?.['ip-address'];
+
+        return {
+          iface: iface.name,
+          type: 'agent',
+          address: ipv4,
+          address6: ipv6
+        };
+      });
+    } catch (agentError) {
+      // 2. Try LXC Interfaces (For Containers)
       try {
         const response = await this.client.get(
-          `/api2/json/nodes/${node}/qemu/${vmid}/agent/network-get-interfaces`
+          `/api2/json/nodes/${node}/lxc/${vmid}/interfaces`
         );
-        const agentInterfaces = response.data.data.result || [];
+        const lxcInterfaces = response.data.data || [];
 
-        // Transform agent format to current format
-        return agentInterfaces.map((iface: any) => {
-          const ipv4 = iface['ip-addresses']?.find((ip: any) => ip['ip-address-type'] === 'ipv4')?.['ip-address'];
-          const ipv6 = iface['ip-addresses']?.find((ip: any) => ip['ip-address-type'] === 'ipv6')?.['ip-address'];
+        interfaces = lxcInterfaces.map((iface: any) => ({
+          iface: iface.name,
+          type: 'lxc',
+          address: iface.inet ? iface.inet.split('/')[0] : undefined, // Strip CIDR
+          address6: iface.inet6 ? iface.inet6.split('/')[0] : undefined
+        }));
+      } catch (lxcError) {
+        // 3. Try QEMU Interfaces (Fallback context)
+        try {
+          const response = await this.client.get(
+            `/api2/json/nodes/${node}/qemu/${vmid}/interfaces`
+          );
+          const qemuInterfaces = response.data.data || [];
 
-          return {
+          interfaces = qemuInterfaces.map((iface: any) => ({
             iface: iface.name,
-            type: 'agent',
-            address: ipv4,
-            address6: ipv6
-          };
-        }).filter((iface: ProxmoxNetworkInterface) => {
-          // Filter out loopback and non-IP interfaces
-          const isLoopback = iface.iface === 'lo' || (iface.address && iface.address.startsWith('127.'));
-          return !isLoopback && (iface.address || iface.address6);
-        });
-      } catch (agentError) {
-        // Fallback or just ignore if agent not running
-        logger.debug(`Agent network fetch failed for ${vmid} (Agent might not be running)`, { error: String(agentError) });
+            type: 'qemu',
+            address: iface.inet ? iface.inet.split('/')[0] : undefined, // Strip CIDR
+            address6: iface.inet6 ? iface.inet6.split('/')[0] : undefined
+          }));
+        } catch (qemuError) {
+          logger.warn(`Failed to get network info for ${vmid} (tried Agent, LXC, QEMU)`, { error: String(agentError) });
+          return [];
+        }
       }
-
-      // Fallback to config/interfaces if agent fails (though this usually just gives MACs)
-      const response = await this.client.get(
-        `/api2/json/nodes/${node}/qemu/${vmid}/interfaces`
-      );
-      return response.data.data || [];
-    } catch (error) {
-      logger.warn(`Failed to get VM ${vmid} network info`, { error: String(error) });
-      return [];
     }
+
+    // Filter loopback and local link addresses
+    return interfaces.filter((iface) => {
+      const isLoopback = iface.iface === 'lo' || (iface.address && iface.address.startsWith('127.'));
+      // Also filter IPv6 Link-local (fe80::) if desired, but for now just loopback
+      return !isLoopback && (iface.address || iface.address6);
+    });
   }
 
   /**
