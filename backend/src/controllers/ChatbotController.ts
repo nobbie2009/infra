@@ -93,7 +93,7 @@ Guidelines:
       }
 
       const response = await this.claudeClient.messages.create({
-        model: 'claude-opus-4-6',
+        model: 'claude-haiku-latest',
         max_tokens: 1024,
         system: this.getSystemPrompt(),
         tools: CHATBOT_TOOLS as any,
