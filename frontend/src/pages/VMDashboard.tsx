@@ -38,6 +38,7 @@ const VMDashboard: React.FC = () => {
   const [allocations, setAllocations] = useState<IPAllocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [refreshingIPs, setRefreshingIPs] = useState(false);
   const [operatingVM, setOperatingVM] = useState<string | null>(null);
 
   useEffect(() => {
@@ -71,6 +72,22 @@ const VMDashboard: React.FC = () => {
       alert('Failed to sync with Proxmox. Make sure your credentials are set and valid.');
     } finally {
       setSyncing(false);
+    }
+  };
+
+  const handleRefreshIPs = async () => {
+    setRefreshingIPs(true);
+    try {
+      const response = await api.post('/infrastructure/refresh-vm-ips');
+      if (response.data.success) {
+        await loadAllocations();
+        alert(`✅ IP addresses updated for ${response.data.data.count} VMs`);
+      }
+    } catch (error) {
+      console.error('Failed to refresh IPs:', error);
+      alert('Failed to refresh IP addresses. Make sure your Proxmox credentials are valid.');
+    } finally {
+      setRefreshingIPs(false);
     }
   };
 
@@ -128,6 +145,13 @@ const VMDashboard: React.FC = () => {
                 className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2"
               >
                 🔄 {loading ? 'Loading...' : 'Refresh'}
+              </button>
+              <button
+                onClick={handleRefreshIPs}
+                disabled={refreshingIPs}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+              >
+                {refreshingIPs ? '⏳ Updating IPs...' : '🔗 Refresh IPs from Proxmox'}
               </button>
               <button
                 onClick={handleSync}

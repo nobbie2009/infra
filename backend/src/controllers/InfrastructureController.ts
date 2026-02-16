@@ -160,6 +160,45 @@ export class InfrastructureController {
   }
 
   /**
+   * POST /api/infrastructure/refresh-vm-ips
+   * Refresh VM IP addresses from Proxmox
+   */
+  async refreshVMIPs(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user) {
+        res.status(401).json({
+          success: false,
+          message: 'Authentication required',
+        });
+        return;
+      }
+
+      const updatedVMs = await this.ipManagementService.refreshVMIPsFromProxmox();
+
+      logger.info(`User ${req.user.username} refreshed IPs for ${updatedVMs.length} VMs`, {
+        userId: req.user.id,
+      });
+
+      res.json({
+        success: true,
+        message: `Refreshed IPs for ${updatedVMs.length} VMs`,
+        data: {
+          count: updatedVMs.length,
+          vms: updatedVMs,
+        },
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to refresh VM IPs';
+      logger.error(message, { endpoint: '/api/infrastructure/refresh-vm-ips' });
+
+      res.status(500).json({
+        success: false,
+        message,
+      });
+    }
+  }
+
+  /**
    * POST /api/infrastructure/vms/:vmId/services
    * Add service to VM
    */

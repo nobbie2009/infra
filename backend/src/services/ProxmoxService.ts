@@ -277,6 +277,41 @@ export class ProxmoxService {
   }
 
   /**
+   * Get VM network IPs from Proxmox
+   * Returns first IPv4 and IPv6 if available
+   */
+  async getVMNetworkIPs(
+    vmid: number,
+    node: string
+  ): Promise<{ ipv4?: string; ipv6?: string }> {
+    if (!this.proxmoxClient) {
+      throw new Error('Proxmox client not initialized');
+    }
+
+    try {
+      const network = await this.proxmoxClient.getVMNetwork(vmid, node);
+
+      const result: { ipv4?: string; ipv6?: string } = {};
+
+      // Extract first IPv4 and IPv6 from network interfaces
+      for (const iface of network) {
+        if (iface.address && !result.ipv4) {
+          result.ipv4 = iface.address;
+        }
+        if (iface.address6 && !result.ipv6) {
+          result.ipv6 = iface.address6;
+        }
+      }
+
+      logger.info(`Retrieved network IPs for VM ${vmid}`, { ipv4: result.ipv4, ipv6: result.ipv6 });
+      return result;
+    } catch (error) {
+      logger.warn(`Failed to get network IPs for VM ${vmid}`, { error: String(error) });
+      return {};
+    }
+  }
+
+  /**
    * Start VM (bypasses cache)
    */
   async startVM(vmid: number, node: string): Promise<string> {

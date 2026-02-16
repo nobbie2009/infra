@@ -355,6 +355,12 @@ async function bootstrap() {
     );
 
     infrastructureRoutes.post(
+      '/refresh-vm-ips',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => infrastructureController.refreshVMIPs(req, res)
+    );
+
+    infrastructureRoutes.post(
       '/vm-details/:vmId/services',
       jwtMiddleware.authenticate(userRepository),
       (req: AuthRequest, res: Response) => infrastructureController.addService(req, res)

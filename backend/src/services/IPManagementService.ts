@@ -147,6 +147,49 @@ export class IPManagementService {
   }
 
   /**
+   * Refresh VM IPs from Proxmox for all VMs
+   */
+  async refreshVMIPsFromProxmox(): Promise<VM[]> {
+    try {
+      const vms = await this.vmRepository.find();
+      const updatedVMs: VM[] = [];
+
+      for (const vm of vms) {
+        try {
+          const ips = await this.proxmoxService.getVMNetworkIPs(vm.vmid, vm.node);
+
+          let updated = false;
+          if (ips.ipv4 && vm.ipv4_address !== ips.ipv4) {
+            vm.ipv4_address = ips.ipv4;
+            updated = true;
+          }
+          if (ips.ipv6 && vm.ipv6_address !== ips.ipv6) {
+            vm.ipv6_address = ips.ipv6;
+            updated = true;
+          }
+
+          if (updated) {
+            const saved = await this.vmRepository.save(vm);
+            updatedVMs.push(saved);
+            logger.info(`Refreshed IPs for VM ${vm.name}`, {
+              ipv4: ips.ipv4,
+              ipv6: ips.ipv6
+            });
+          }
+        } catch (error) {
+          logger.warn(`Failed to refresh IPs for VM ${vm.name}`, { error: String(error) });
+        }
+      }
+
+      logger.info(`Refreshed IPs for ${updatedVMs.length} VMs`);
+      return updatedVMs;
+    } catch (error) {
+      logger.error('Failed to refresh VM IPs from Proxmox', { error: String(error) });
+      throw error;
+    }
+  }
+
+  /**
    * Add service to VM
    */
   async addService(
