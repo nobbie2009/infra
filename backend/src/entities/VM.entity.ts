@@ -39,6 +39,9 @@ export class VM {
   @Column({ default: 'offline' })
   status: 'online' | 'offline' | 'paused';
 
+  @Column('simple-array', { nullable: true })
+  tags: string[];
+
   @Column({ default: 0 })
   cpu_cores: number;
 

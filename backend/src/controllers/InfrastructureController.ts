@@ -86,10 +86,10 @@ export class InfrastructureController {
   }
 
   /**
-   * PUT /api/infrastructure/vms/:vmId/ip
-   * Update VM IP address
+   * PUT /api/infrastructure/vms/:vmId
+   * Update VM details (IPs, Description, Tags)
    */
-  async updateVMIP(req: AuthRequest, res: Response): Promise<void> {
+  async updateVM(req: AuthRequest, res: Response): Promise<void> {
     try {
       if (!req.user) {
         res.status(401).json({
@@ -100,17 +100,17 @@ export class InfrastructureController {
       }
 
       const { vmId } = req.params;
-      const { ipv4, ipv6, hostname } = req.body;
+      const updates = req.body; // Expecting partial VM object
 
-      const updated = await this.ipManagementService.updateVMIP(vmId, ipv4, ipv6, hostname);
+      const updated = await this.ipManagementService.updateVM(vmId, updates);
 
       res.json({
         success: true,
-        message: 'VM IP updated successfully',
+        message: 'VM updated successfully',
         data: updated,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update VM IP';
+      const message = error instanceof Error ? error.message : 'Failed to update VM';
       logger.error(message, { vmId: req.params.vmId });
 
       res.status(500).json({

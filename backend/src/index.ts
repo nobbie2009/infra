@@ -343,9 +343,9 @@ async function bootstrap() {
     );
 
     infrastructureRoutes.put(
-      '/vm-details/:vmId/ip',
+      '/vms/:vmId',
       jwtMiddleware.authenticate(userRepository),
-      (req: AuthRequest, res: Response) => infrastructureController.updateVMIP(req, res)
+      (req: AuthRequest, res: Response) => infrastructureController.updateVM(req, res)
     );
 
     infrastructureRoutes.post(

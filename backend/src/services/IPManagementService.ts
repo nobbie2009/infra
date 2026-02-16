@@ -14,6 +14,8 @@ export interface IPAllocation {
   hostname: string | null;
   status: string;
   node: string;
+  tags: string[]; // Added tags
+  description: string; // Added description
   services: {
     name: string;
     type: ServiceType;
@@ -107,6 +109,8 @@ export class IPManagementService {
       hostname: vm.hostname,
       status: vm.status,
       node: vm.node,
+      tags: vm.tags || [],
+      description: vm.description, // Added description
       services: vm.services.map((s) => ({
         name: s.name,
         type: s.type,
@@ -127,23 +131,36 @@ export class IPManagementService {
   }
 
   /**
-   * Update VM IP address
+   * Update VM details (IPs, Description, Tags)
    */
-  async updateVMIP(vmId: string, ipv4?: string, ipv6?: string, hostname?: string): Promise<VM> {
+  async updateVM(vmId: string, data: Partial<VM>): Promise<VM> {
     const vm = await this.vmRepository.findOne({ where: { id: vmId } });
 
     if (!vm) {
       throw new Error(`VM with ID ${vmId} not found`);
     }
 
-    if (ipv4) vm.ipv4_address = ipv4;
-    if (ipv6) vm.ipv6_address = ipv6;
-    if (hostname) vm.hostname = hostname;
+    if (data.ipv4_address !== undefined) vm.ipv4_address = data.ipv4_address;
+    if (data.ipv6_address !== undefined) vm.ipv6_address = data.ipv6_address;
+    if (data.hostname !== undefined) vm.hostname = data.hostname;
+    if (data.description !== undefined) vm.description = data.description;
+    if (data.tags !== undefined) vm.tags = data.tags;
 
     const updated = await this.vmRepository.save(vm);
-    logger.info(`Updated VM IP: ${vm.name}`, { vmId, ipv4, ipv6, hostname });
+    logger.info(`Updated VM details: ${vm.name}`, { vmId, updates: Object.keys(data) });
 
     return updated;
+  }
+
+  /**
+   * Update VM IP address (Legacy wrapper for backward compatibility)
+   */
+  async updateVMIP(vmId: string, ipv4?: string, ipv6?: string, hostname?: string): Promise<VM> {
+    return this.updateVM(vmId, {
+      ipv4_address: ipv4,
+      ipv6_address: ipv6,
+      hostname: hostname
+    });
   }
 
   /**

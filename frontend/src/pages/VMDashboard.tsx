@@ -1,18 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../lib/api';
-
-interface VM {
-  vmid: number;
-  name: string;
-  status: 'running' | 'stopped' | 'paused';
-  node: string;
-  maxcpu: number;
-  maxmem: number;
-  mem: number;
-  cpu: number;
-  uptime: number;
-}
 
 interface Service {
   id: string;
@@ -23,6 +11,7 @@ interface Service {
 }
 
 interface IPAllocation {
+  id: string; // Database ID
   vmid: number;
   name: string;
   node: string;
@@ -30,10 +19,13 @@ interface IPAllocation {
   ipv6: string | null;
   hostname: string | null;
   status: string;
+  tags: string[];
+  description: string;
   services: Service[];
 }
 
 const VMDashboard: React.FC = () => {
+  // State
   const { user } = useAuth();
   const [allocations, setAllocations] = useState<IPAllocation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,9 +33,19 @@ const VMDashboard: React.FC = () => {
   const [refreshingIPs, setRefreshingIPs] = useState(false);
   const [operatingVM, setOperatingVM] = useState<string | null>(null);
 
+  // Filters & Sorting
+  const [filterText, setFilterText] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof IPAllocation; direction: 'asc' | 'desc' } | null>(null);
+
+  // Editing State
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<{ description: string; tags: string }>({ description: '', tags: '' });
+
+  // Load Data
   useEffect(() => {
     loadAllocations();
-    const interval = setInterval(loadAllocations, 10000); // Refresh every 10s
+    const interval = setInterval(loadAllocations, 10000); // 10s auto-refresh
     return () => clearInterval(interval);
   }, []);
 
@@ -60,16 +62,15 @@ const VMDashboard: React.FC = () => {
     }
   };
 
+  // Actions
   const handleSync = async () => {
     setSyncing(true);
     try {
       const response = await api.post('/infrastructure/sync-vms');
-      if (response.data.success) {
-        await loadAllocations();
-      }
+      if (response.data.success) await loadAllocations();
     } catch (error) {
       console.error('Failed to sync VMs:', error);
-      alert('Failed to sync with Proxmox. Make sure your credentials are set and valid.');
+      alert('Failed to sync with Proxmox.');
     } finally {
       setSyncing(false);
     }
@@ -85,7 +86,7 @@ const VMDashboard: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to refresh IPs:', error);
-      alert('Failed to refresh IP addresses. Make sure your Proxmox credentials are valid.');
+      alert('Failed to refresh IP addresses.');
     } finally {
       setRefreshingIPs(false);
     }
@@ -95,7 +96,6 @@ const VMDashboard: React.FC = () => {
     setOperatingVM(`${vmid}-${action}`);
     try {
       await api.post(`/infrastructure/vms/${vmid}/${action}?node=${node}`);
-      // Reload after a short delay to allow Proxmox to process
       setTimeout(() => loadAllocations(), 2000);
     } catch (error) {
       alert(`Failed to ${action} VM`);
@@ -104,27 +104,82 @@ const VMDashboard: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'running':
-        return 'bg-green-100 text-green-800';
-      case 'stopped':
-        return 'bg-red-100 text-red-800';
-      case 'paused':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  // Edit Handlers
+  const startEditing = (vm: IPAllocation) => {
+    setEditingId(vm.id);
+    setEditForm({
+      description: vm.description || '',
+      tags: (vm.tags || []).join(', '),
+    });
+  };
+
+  const saveEdit = async (vmId: string) => {
+    try {
+      const tagsArray = editForm.tags.split(',').map(t => t.trim()).filter(t => t);
+      await api.put(`/infrastructure/vms/${vmId}`, {
+        description: editForm.description,
+        tags: tagsArray
+      });
+      setEditingId(null);
+      await loadAllocations();
+    } catch (error) {
+      console.error('Failed to save VM details:', error);
+      alert('Failed to save changes.');
     }
   };
 
-  const getHealthColor = (status: string) => {
+  // Derived Data (Filtered & Sorted)
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    allocations.forEach(vm => (vm.tags || []).forEach(t => tags.add(t)));
+    return Array.from(tags).sort();
+  }, [allocations]);
+
+  const filteredAllocations = useMemo(() => {
+    let result = [...allocations];
+
+    if (filterText) {
+      const lower = filterText.toLowerCase();
+      result = result.filter(vm =>
+        vm.name.toLowerCase().includes(lower) ||
+        (vm.ipv4 || '').includes(lower) ||
+        (vm.ipv6 || '').includes(lower)
+      );
+    }
+
+    if (selectedTags.length > 0) {
+      result = result.filter(vm =>
+        selectedTags.every(tag => (vm.tags || []).includes(tag))
+      );
+    }
+
+    if (sortConfig) {
+      result.sort((a, b) => {
+        const valA = a[sortConfig.key] || '';
+        const valB = b[sortConfig.key] || '';
+        if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [allocations, filterText, selectedTags, sortConfig]);
+
+  const requestSort = (key: keyof IPAllocation) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'healthy':
-        return 'text-green-600';
-      case 'unhealthy':
-        return 'text-red-600';
-      default:
-        return 'text-gray-600';
+      case 'running': return 'bg-green-100 text-green-800';
+      case 'stopped': return 'bg-red-100 text-red-800';
+      case 'paused': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -132,165 +187,197 @@ const VMDashboard: React.FC = () => {
     <div className="p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">🖥️ VM Dashboard</h1>
-              <p className="text-gray-600 mt-2">Monitor and control your virtual machines</p>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={loadAllocations}
-                disabled={loading}
-                className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2"
-              >
-                🔄 {loading ? 'Loading...' : 'Refresh'}
-              </button>
-              <button
-                onClick={handleRefreshIPs}
-                disabled={refreshingIPs}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
-              >
-                {refreshingIPs ? '⏳ Updating IPs...' : '🔗 Refresh IPs from Proxmox'}
-              </button>
-              <button
-                onClick={handleSync}
-                disabled={syncing}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-              >
-                {syncing ? '⏳ Syncing...' : '📡 Sync with Proxmox'}
-              </button>
-            </div>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">🖥️ VM Inventory</h1>
+            <p className="text-gray-500 mt-1">Manage virtual machines, IPs, and tags</p>
           </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-3xl font-bold text-blue-600">
-              {allocations.filter((a: IPAllocation) => a.status === 'running').length}
-            </div>
-            <div className="text-gray-600">Running VMs</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-3xl font-bold text-red-600">
-              {allocations.filter((a: IPAllocation) => a.status === 'stopped').length}
-            </div>
-            <div className="text-gray-600">Stopped VMs</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="text-3xl font-bold text-purple-600">{allocations.length}</div>
-            <div className="text-gray-600">Total VMs</div>
-          </div>
-        </div>
-
-        {/* VMs List */}
-        {loading ? (
-          <div className="text-center py-12 text-gray-500 flex flex-col items-center gap-4">
-            <div className="animate-spin text-4xl">🔄</div>
-            <div>Loading VM data...</div>
-          </div>
-        ) : allocations.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <div className="text-6xl mb-4">🔍</div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">No VMs found in database</h2>
-            <p className="text-gray-600 mb-6">
-              It looks like your VMs haven't been synchronized from Proxmox yet.
-            </p>
-            <button
-              onClick={handleSync}
-              disabled={syncing}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold"
-            >
-              {syncing ? 'Syncing...' : '📡 Sync Now'}
+          <div className="flex gap-3">
+            <button onClick={loadAllocations} disabled={loading} className="btn-secondary flex items-center gap-2">
+              🔄 Refresh
+            </button>
+            <button onClick={handleRefreshIPs} disabled={refreshingIPs} className="btn-primary bg-purple-600 hover:bg-purple-700 flex items-center gap-2">
+              {refreshingIPs ? '⏳ Updating...' : '🔗 Update IPs'}
+            </button>
+            <button onClick={handleSync} disabled={syncing} className="btn-primary flex items-center gap-2">
+              {syncing ? '⏳ Syncing...' : '📡 Sync Proxmox'}
             </button>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {allocations.map((alloc: IPAllocation) => (
-              <div key={`${alloc.node}-${alloc.vmid}`} className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition">
-                {/* VM Header */}
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-xl font-bold">{alloc.name}</h3>
-                      <p className="text-blue-100">Node: {alloc.node} | VMID: {alloc.vmid}</p>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(alloc.status)}`}>
-                      {alloc.status.toUpperCase()}
-                    </span>
-                  </div>
-                </div>
+        </div>
 
-                {/* VM Details */}
-                <div className="p-4 space-y-3 border-b">
-                  {alloc.ipv4 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">IPv4:</span>
-                      <code className="bg-gray-100 px-2 py-1 rounded">{alloc.ipv4}</code>
-                    </div>
-                  )}
-                  {alloc.ipv6 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">IPv6:</span>
-                      <code className="bg-gray-100 px-2 py-1 rounded text-xs">{alloc.ipv6}</code>
-                    </div>
-                  )}
-                  {alloc.hostname && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Hostname:</span>
-                      <span className="font-mono">{alloc.hostname}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Services */}
-                {alloc.services.length > 0 && (
-                  <div className="p-4 border-b">
-                    <h4 className="font-semibold text-sm mb-2">Services ({alloc.services.length})</h4>
-                    <div className="space-y-1">
-                      {alloc.services.map((service: Service) => (
-                        <div key={service.id} className="flex justify-between text-xs text-gray-600">
-                          <span>
-                            {service.name} ({service.type})
-                          </span>
-                          <span className={`font-medium ${getHealthColor(service.health_status)}`}>
-                            ● {service.health_status}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="p-4 flex gap-2 bg-gray-50">
-                  <button
-                    onClick={() => handleVMAction(alloc.vmid, alloc.node, 'start')}
-                    disabled={operatingVM?.startsWith(`${alloc.vmid}-start`) || alloc.status === 'running'}
-                    className="flex-1 px-3 py-2 bg-green-500 text-white rounded text-sm hover:bg-green-600 disabled:opacity-50 font-medium"
-                  >
-                    {operatingVM?.startsWith(`${alloc.vmid}-start`) ? '⏳' : '▶️'} Start
-                  </button>
-                  <button
-                    onClick={() => handleVMAction(alloc.vmid, alloc.node, 'stop')}
-                    disabled={operatingVM?.startsWith(`${alloc.vmid}-stop`) || alloc.status === 'stopped'}
-                    className="flex-1 px-3 py-2 bg-red-500 text-white rounded text-sm hover:bg-red-600 disabled:opacity-50 font-medium"
-                  >
-                    {operatingVM?.startsWith(`${alloc.vmid}-stop`) ? '⏳' : '⏹️'} Stop
-                  </button>
-                  <button
-                    onClick={() => handleVMAction(alloc.vmid, alloc.node, 'restart')}
-                    disabled={operatingVM?.startsWith(`${alloc.vmid}-restart`) || alloc.status === 'stopped'}
-                    className="flex-1 px-3 py-2 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 disabled:opacity-50 font-medium"
-                  >
-                    {operatingVM?.startsWith(`${alloc.vmid}-restart`) ? '⏳' : '🔄'} Restart
-                  </button>
-                </div>
-              </div>
-            ))}
+        {/* Filters */}
+        <div className="bg-white p-4 rounded-lg shadow mb-6 flex flex-col md:flex-row gap-4 items-center">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+            <input
+              type="text"
+              placeholder="Search by Name or IP..."
+              className="pl-10 w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+            />
           </div>
-        )}
+          <div className="flex items-center gap-2 overflow-x-auto max-w-full">
+            <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Tags:</span>
+            {allTags.map(tag => (
+              <button
+                key={tag}
+                onClick={() => setSelectedTags(prev =>
+                  prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+                )}
+                className={`px-3 py-1 rounded-full text-xs font-medium border transition ${selectedTags.includes(tag)
+                    ? 'bg-blue-100 text-blue-800 border-blue-200'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                  }`}
+              >
+                {tag}
+              </button>
+            ))}
+            {allTags.length === 0 && <span className="text-xs text-gray-400 italic">No tags found</span>}
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th onClick={() => requestSort('status')} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 w-24">Status</th>
+                  <th onClick={() => requestSort('name')} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Name / Node</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">IP Address</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer w-48">Tags</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">Description</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-40">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredAllocations.map(vm => (
+                  <tr key={vm.id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(vm.status)}`}>
+                        {vm.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{vm.name}</div>
+                      <div className="text-xs text-gray-500">{vm.node} (ID: {vm.vmid})</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {vm.ipv4 ? (
+                        <div
+                          className="text-sm bg-gray-100 px-2 py-1 rounded inline-block font-mono cursor-pointer hover:bg-gray-200"
+                          title="Click to copy"
+                          onClick={() => navigator.clipboard.writeText(vm.ipv4 || '')}
+                        >
+                          {vm.ipv4}
+                        </div>
+                      ) : <span className="text-xs text-gray-400">-</span>}
+                      {vm.ipv6 && <div className="text-xs text-gray-400 mt-1 truncate max-w-[150px]" title={vm.ipv6}>{vm.ipv6}</div>}
+                    </td>
+
+                    {/* Tags (Editable) */}
+                    <td className="px-6 py-4">
+                      {editingId === vm.id ? (
+                        <input
+                          type="text"
+                          className="w-full text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                          value={editForm.tags}
+                          onChange={e => setEditForm({ ...editForm, tags: e.target.value })}
+                          placeholder="comma, separated"
+                        />
+                      ) : (
+                        <div className="flex flex-wrap gap-1">
+                          {(vm.tags || []).length > 0 ? (
+                            vm.tags.map((tag, idx) => (
+                              <span key={idx} className="px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700 border border-blue-100">
+                                {tag}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-gray-400 italic">No tags</span>
+                          )}
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Description (Editable) */}
+                    <td className="px-6 py-4">
+                      {editingId === vm.id ? (
+                        <div className="flex flex-col gap-2">
+                          <input
+                            type="text"
+                            className="w-full text-sm border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500"
+                            value={editForm.description}
+                            onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                            placeholder="Enter description..."
+                          />
+                          <div className="flex gap-2 justify-end">
+                            <button onClick={() => setEditingId(null)} className="text-xs text-gray-500 hover:text-gray-700">Cancel</button>
+                            <button onClick={() => saveEdit(vm.id)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">Save</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          className="text-sm text-gray-500 cursor-pointer hover:text-gray-700"
+                          onClick={() => startEditing(vm)}
+                          title="Click to edit"
+                        >
+                          {vm.description || <span className="italic text-gray-300">Add description...</span>}
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => handleVMAction(vm.vmid, vm.node, 'start')}
+                          disabled={vm.status === 'running' || !!operatingVM}
+                          className="p-1 text-green-600 hover:text-green-900 disabled:opacity-30 tooltip"
+                          title="Start"
+                        >
+                          ▶️
+                        </button>
+                        <button
+                          onClick={() => handleVMAction(vm.vmid, vm.node, 'restart')}
+                          disabled={vm.status === 'stopped' || !!operatingVM}
+                          className="p-1 text-blue-600 hover:text-blue-900 disabled:opacity-30"
+                          title="Restart"
+                        >
+                          🔄
+                        </button>
+                        <button
+                          onClick={() => handleVMAction(vm.vmid, vm.node, 'stop')}
+                          disabled={vm.status === 'stopped' || !!operatingVM}
+                          className="p-1 text-red-600 hover:text-red-900 disabled:opacity-30"
+                          title="Stop"
+                        >
+                          ⏹️
+                        </button>
+                        {/* Edit Button (Explicit) */}
+                        {editingId !== vm.id && (
+                          <button
+                            onClick={() => startEditing(vm)}
+                            className="p-1 text-gray-400 hover:text-gray-600"
+                            title="Edit Details"
+                          >
+                            ✏️
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {filteredAllocations.length === 0 && (
+            <div className="p-8 text-center text-gray-500">
+              No VMs found matching your filters.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
