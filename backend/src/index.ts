@@ -577,6 +577,13 @@ async function bootstrap() {
       (req: AuthRequest, res: Response) => promptsController.generate(req, res)
     );
 
+    // Chatbot-assisted prompt generation
+    promptRoutes.post(
+      '/generate/feature/:featureId/chat',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => promptsController.generateWithChatbot(req, res)
+    );
+
     app.use('/api/prompts', promptRoutes);
 
     // Admin Routes
