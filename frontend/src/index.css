@@ -1,3 +1,130 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* === Terminal Base Styles === */
+body {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  background-color: #0a0a0a;
+  color: #00ff41;
+  overflow-x: hidden;
+}
+
+/* === CRT Scanlines Overlay === */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  opacity: 0.3;
+}
+
+/* === Text Glow Effect === */
+.text-glow {
+  text-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+}
+
+.text-glow-strong {
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+}
+
+/* === Flicker Animation (for active states) === */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.95; }
+}
+
+.animate-flicker {
+  animation: flicker 0.15s ease-in-out;
+}
+
+/* === Blink Animation (for status indicators) === */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+.animate-blink {
+  animation: blink 1s infinite;
+}
+
+/* === Terminal Button Base === */
+.btn-terminal {
+  @apply px-4 py-2 border border-terminal-primary bg-terminal-surface text-terminal-primary font-mono uppercase tracking-wider transition-all;
+  @apply hover:bg-terminal-primary hover:text-terminal-bg hover:shadow-terminal-glow;
+}
+
+.btn-terminal:disabled {
+  @apply opacity-50 cursor-not-allowed border-terminal-muted text-terminal-muted;
+  @apply hover:bg-terminal-surface hover:text-terminal-muted hover:shadow-none;
+}
+
+/* === Terminal Input Base === */
+.input-terminal {
+  @apply w-full px-3 py-2 bg-terminal-bg border border-terminal-border text-terminal-primary font-mono;
+  @apply focus:border-terminal-primary focus:outline-none focus:shadow-terminal-glow;
+  @apply placeholder:text-terminal-muted;
+}
+
+/* === Terminal Card Base === */
+.card-terminal {
+  @apply bg-terminal-surface border border-terminal-border p-6;
+}
+
+/* === Terminal Table Styles === */
+.table-terminal {
+  @apply w-full border-collapse font-mono text-sm;
+}
+
+.table-terminal th {
+  @apply border border-terminal-border bg-terminal-surface text-terminal-primary uppercase tracking-wider px-4 py-3 text-left;
+}
+
+.table-terminal td {
+  @apply border border-terminal-border px-4 py-3 text-terminal-secondary;
+}
+
+.table-terminal tr:hover td {
+  @apply bg-terminal-surface;
+}
+
+/* === Status Indicators === */
+.status-healthy {
+  @apply text-terminal-primary;
+}
+
+.status-unhealthy {
+  @apply text-terminal-danger;
+}
+
+.status-warning {
+  @apply text-terminal-warning;
+}
+
+/* === ASCII Decorators === */
+.section-header::before {
+  content: '>>> ';
+  @apply text-terminal-accent;
+}
+
+.section-header::after {
+  content: ' <<<';
+  @apply text-terminal-accent;
+}
+
+/* === Remove default focus rings, use green glow instead === */
+*:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.3);
+}

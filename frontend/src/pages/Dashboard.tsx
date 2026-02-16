@@ -77,9 +77,9 @@ const Dashboard: React.FC = () => {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'bg-red-100 text-red-800 border-red-200';
-      case 'warning': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'critical': return 'border-terminal-danger text-terminal-danger';
+      case 'warning': return 'border-terminal-warning text-terminal-warning';
+      default: return 'border-terminal-primary text-terminal-primary';
     }
   };
 
@@ -94,7 +94,7 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="text-xl text-gray-500">Loading Mission Control...</div>
+        <div className="text-xl text-terminal-primary text-glow font-mono">[ loading... ]</div>
       </div>
     );
   }
@@ -104,11 +104,11 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">👋 Welcome back, {user?.username}</h1>
-          <p className="text-gray-500">Here's what's happening in your infrastructure today.</p>
+          <h1 className="text-3xl font-bold text-terminal-primary text-glow section-header">WELCOME {user?.username?.toUpperCase()}</h1>
+          <p className="text-terminal-muted font-mono mt-2">infrastructure status overview</p>
         </div>
-        <div className="text-sm text-gray-400">
-          Last updated: {new Date().toLocaleTimeString()}
+        <div className="text-sm text-terminal-muted font-mono">
+          [ LAST UPDATED: {new Date().toLocaleTimeString()} ]
         </div>
       </div>
 
@@ -116,55 +116,53 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* System Health Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            🖥️ System Health
-          </h2>
-          <div className="space-y-4">
+        <div className="card-terminal">
+          <h2 className="text-lg font-semibold text-terminal-primary mb-4 flex items-center gap-2 section-header">SYSTEM HEALTH</h2>
+          <div className="space-y-4 font-mono text-sm">
             {stats && (
               <>
                 {/* CPU */}
                 <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">CPU Usage</span>
-                    <span className="font-medium text-gray-900">{stats.cpu.usage.toFixed(1)}%</span>
+                  <div className="flex justify-between mb-1 text-terminal-secondary">
+                    <span>CPU USAGE</span>
+                    <span className={`${(stats.cpu.usage || 0) > 80 ? 'text-terminal-danger' : 'text-terminal-primary'}`}>{(stats.cpu.usage || 0).toFixed(1)}%</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-terminal-border h-2">
                     <div
-                      className={`h-2 rounded-full transition-all duration-500 ${stats.cpu.usage > 80 ? 'bg-red-500' : 'bg-blue-500'}`}
-                      style={{ width: `${stats.cpu.usage}%` }}
+                      className={`h-2 transition-all duration-500 ${(stats.cpu.usage || 0) > 80 ? 'bg-terminal-danger' : 'bg-terminal-primary'}`}
+                      style={{ width: `${(stats.cpu.usage || 0)}%` }}
                     ></div>
                   </div>
                 </div>
 
                 {/* RAM */}
                 <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Memory</span>
-                    <span className="font-medium text-gray-900">
+                  <div className="flex justify-between mb-1 text-terminal-secondary">
+                    <span>MEMORY</span>
+                    <span className={`${(stats.memory.usage || 0) > 90 ? 'text-terminal-danger' : 'text-terminal-primary'}`}>
                       {formatBytes(stats.memory.used)} / {formatBytes(stats.memory.total)}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-terminal-border h-2">
                     <div
-                      className={`h-2 rounded-full transition-all duration-500 ${stats.memory.usage > 90 ? 'bg-red-500' : 'bg-purple-500'}`}
-                      style={{ width: `${stats.memory.usage}%` }}
+                      className={`h-2 transition-all duration-500 ${(stats.memory.usage || 0) > 90 ? 'bg-terminal-danger' : 'bg-terminal-accent'}`}
+                      style={{ width: `${(stats.memory.usage || 0)}%` }}
                     ></div>
                   </div>
                 </div>
 
                 {/* Disk */}
                 <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-600">Disk Space</span>
-                    <span className="font-medium text-gray-900">
+                  <div className="flex justify-between mb-1 text-terminal-secondary">
+                    <span>DISK SPACE</span>
+                    <span className={`${(stats.disk.usage || 0) > 90 ? 'text-terminal-danger' : 'text-terminal-primary'}`}>
                       {formatBytes(stats.disk.used)} / {formatBytes(stats.disk.total)}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-terminal-border h-2">
                     <div
-                      className={`h-2 rounded-full transition-all duration-500 ${stats.disk.usage > 90 ? 'bg-red-500' : 'bg-green-500'}`}
-                      style={{ width: `${stats.disk.usage}%` }}
+                      className={`h-2 transition-all duration-500 ${(stats.disk.usage || 0) > 90 ? 'bg-terminal-danger' : 'bg-terminal-primary'}`}
+                      style={{ width: `${(stats.disk.usage || 0)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -174,68 +172,64 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Infrastructure Summary */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            🏗️ Infrastructure
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div onClick={() => navigate('/vms')} className="bg-blue-50 p-4 rounded-lg cursor-pointer hover:bg-blue-100 transition">
-              <div className="text-2xl font-bold text-blue-700">{vmCounts.running}</div>
-              <div className="text-sm text-blue-600 font-medium">Running VMs</div>
-              <div className="text-xs text-blue-400 mt-1">Total: {vmCounts.total}</div>
+        <div className="card-terminal">
+          <h2 className="text-lg font-semibold text-terminal-primary mb-4 flex items-center gap-2 section-header">INFRASTRUCTURE</h2>
+          <div className="grid grid-cols-2 gap-4 font-mono text-sm">
+            <div onClick={() => navigate('/vms')} className="border border-terminal-border p-4 cursor-pointer hover:bg-terminal-surface transition">
+              <div className="text-2xl font-bold text-terminal-primary">{vmCounts.running}</div>
+              <div className="text-terminal-secondary font-medium">RUNNING VMS</div>
+              <div className="text-terminal-muted mt-1">TOTAL: {vmCounts.total}</div>
             </div>
-            <div onClick={() => navigate('/vms')} className="bg-purple-50 p-4 rounded-lg cursor-pointer hover:bg-purple-100 transition">
-              <div className="text-2xl font-bold text-purple-700">{serviceCounts.healthy}</div>
-              <div className="text-sm text-purple-600 font-medium">Healthy Services</div>
-              <div className="text-xs text-purple-400 mt-1">Total: {serviceCounts.total}</div>
+            <div onClick={() => navigate('/vms')} className="border border-terminal-border p-4 cursor-pointer hover:bg-terminal-surface transition">
+              <div className="text-2xl font-bold text-terminal-primary">{serviceCounts.healthy}</div>
+              <div className="text-terminal-secondary font-medium">HEALTHY SVC</div>
+              <div className="text-terminal-muted mt-1">TOTAL: {serviceCounts.total}</div>
             </div>
-            <div onClick={() => navigate('/vms')} className="bg-red-50 p-4 rounded-lg cursor-pointer hover:bg-red-100 transition">
-              <div className="text-2xl font-bold text-red-700">{vmCounts.stopped}</div>
-              <div className="text-sm text-red-600 font-medium">Stopped VMs</div>
+            <div onClick={() => navigate('/vms')} className="border border-terminal-border p-4 cursor-pointer hover:bg-terminal-surface transition">
+              <div className="text-2xl font-bold text-terminal-danger">{vmCounts.stopped}</div>
+              <div className="text-terminal-secondary font-medium">STOPPED VMS</div>
             </div>
-            <div onClick={() => navigate('/alerts')} className="bg-yellow-50 p-4 rounded-lg cursor-pointer hover:bg-yellow-100 transition">
-              <div className="text-2xl font-bold text-yellow-700">{alerts.length}</div>
-              <div className="text-sm text-yellow-600 font-medium">Active Alerts</div>
+            <div onClick={() => navigate('/alerts')} className="border border-terminal-border p-4 cursor-pointer hover:bg-terminal-surface transition">
+              <div className={`text-2xl font-bold ${alerts.length > 0 ? 'text-terminal-warning' : 'text-terminal-primary'}`}>{alerts.length}</div>
+              <div className="text-terminal-secondary font-medium">ACTIVE ALERTS</div>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            ⚡ Quick Actions
-          </h2>
-          <div className="grid grid-cols-1 gap-3">
+        <div className="card-terminal">
+          <h2 className="text-lg font-semibold text-terminal-primary mb-4 flex items-center gap-2 section-header">QUICK ACCESS</h2>
+          <div className="grid grid-cols-1 gap-3 font-mono text-sm">
             <button
               onClick={() => navigate('/vms')}
-              className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition text-left"
+              className="flex items-center gap-3 p-3 border border-terminal-border hover:bg-terminal-surface transition text-left"
             >
               <span className="text-xl">🖥️</span>
               <div>
-                <div className="font-medium text-gray-900">Manage VMs</div>
-                <div className="text-xs text-gray-500">Access Proxmox consoles & power</div>
+                <div className="font-medium text-terminal-primary">MANAGE VMS</div>
+                <div className="text-xs text-terminal-muted">proxmox consoles</div>
               </div>
             </button>
 
             <button
               onClick={() => navigate('/credentials')}
-              className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition text-left"
+              className="flex items-center gap-3 p-3 border border-terminal-border hover:bg-terminal-surface transition text-left"
             >
               <span className="text-xl">🔐</span>
               <div>
-                <div className="font-medium text-gray-900">Credentials Vault</div>
-                <div className="text-xs text-gray-500">Update API keys & secrets</div>
+                <div className="font-medium text-terminal-primary">CREDENTIALS VAULT</div>
+                <div className="text-xs text-terminal-muted">api keys & secrets</div>
               </div>
             </button>
 
             <button
               onClick={() => navigate('/prompts')}
-              className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition text-left"
+              className="flex items-center gap-3 p-3 border border-terminal-border hover:bg-terminal-surface transition text-left"
             >
               <span className="text-xl">✨</span>
               <div>
-                <div className="font-medium text-gray-900">Prompt Generator</div>
-                <div className="text-xs text-gray-500">Create AI prompts for coding</div>
+                <div className="font-medium text-terminal-primary">PROMPT GENERATOR</div>
+                <div className="text-xs text-terminal-muted">ai prompt generation</div>
               </div>
             </button>
           </div>
@@ -245,30 +239,30 @@ const Dashboard: React.FC = () => {
       {/* Bottom Row: Active Alerts & Activity (Placeholder) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Active Alerts List */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="card-terminal">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">🚨 Active Alerts</h2>
-            <button onClick={() => navigate('/alerts')} className="text-sm text-blue-600 hover:underline">View All</button>
+            <h2 className="text-lg font-semibold text-terminal-primary section-header">ACTIVE ALERTS</h2>
+            <button onClick={() => navigate('/alerts')} className="text-sm text-terminal-primary hover:text-terminal-accent transition font-mono">[VIEW ALL]</button>
           </div>
 
           {alerts.length === 0 ? (
-            <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-              ✅ No active alerts. Systems normal.
+            <div className="text-center py-8 text-terminal-primary border border-dashed border-terminal-border font-mono">
+              [ OK ] systems normal
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 font-mono text-sm">
               {alerts.slice(0, 5).map(alert => (
-                <div key={alert.id} className={`p-4 rounded-lg border ${getSeverityColor(alert.severity)}`}>
+                <div key={alert.id} className={`p-3 border ${getSeverityColor(alert.severity)}`}>
                   <div className="flex justify-between items-start">
-                    <div className="font-semibold">{alert.title}</div>
+                    <div className="font-semibold">[{alert.severity.toUpperCase()}] {alert.title}</div>
                     <span className="text-xs opacity-75">{new Date(alert.created_at).toLocaleTimeString()}</span>
                   </div>
-                  <div className="text-sm mt-1 opacity-90">{alert.message}</div>
+                  <div className="text-xs mt-1 opacity-90">{alert.message}</div>
                 </div>
               ))}
               {alerts.length > 5 && (
-                <div className="text-center text-sm text-gray-500 pt-2">
-                  + {alerts.length - 5} more alerts
+                <div className="text-center text-sm text-terminal-muted pt-2 font-mono">
+                  [ +{alerts.length - 5} MORE ]
                 </div>
               )}
             </div>
@@ -276,10 +270,10 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Recent Activity (Placeholder / Future Feature) */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 opacity-75">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">📊 Recent Activity</h2>
-          <div className="text-center py-12 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-            (Comparison charts & audit logs coming in v2.0)
+        <div className="card-terminal opacity-75">
+          <h2 className="text-lg font-semibold text-terminal-primary mb-4 section-header">ACTIVITY LOG</h2>
+          <div className="text-center py-12 text-terminal-muted border border-dashed border-terminal-border font-mono text-sm">
+            [ v2.0 ] audit logs & charts
           </div>
         </div>
       </div>
