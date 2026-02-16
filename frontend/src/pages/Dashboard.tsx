@@ -125,12 +125,12 @@ const Dashboard: React.FC = () => {
                 <div>
                   <div className="flex justify-between mb-1 text-terminal-secondary">
                     <span>CPU USAGE</span>
-                    <span className={`${(stats.cpu.usage || 0) > 80 ? 'text-terminal-danger' : 'text-terminal-primary'}`}>{(stats.cpu.usage || 0).toFixed(1)}%</span>
+                    <span className={`${Number(stats.cpu.usage || 0) > 80 ? 'text-terminal-danger' : 'text-terminal-primary'}`}>{Number(stats.cpu.usage || 0).toFixed(1)}%</span>
                   </div>
                   <div className="w-full bg-terminal-border h-2">
                     <div
-                      className={`h-2 transition-all duration-500 ${(stats.cpu.usage || 0) > 80 ? 'bg-terminal-danger' : 'bg-terminal-primary'}`}
-                      style={{ width: `${(stats.cpu.usage || 0)}%` }}
+                      className={`h-2 transition-all duration-500 ${Number(stats.cpu.usage || 0) > 80 ? 'bg-terminal-danger' : 'bg-terminal-primary'}`}
+                      style={{ width: `${Number(stats.cpu.usage || 0)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -139,14 +139,14 @@ const Dashboard: React.FC = () => {
                 <div>
                   <div className="flex justify-between mb-1 text-terminal-secondary">
                     <span>MEMORY</span>
-                    <span className={`${(stats.memory.usage || 0) > 90 ? 'text-terminal-danger' : 'text-terminal-primary'}`}>
-                      {formatBytes(stats.memory.used)} / {formatBytes(stats.memory.total)}
+                    <span className={`${Number(stats.memory.usage || 0) > 90 ? 'text-terminal-danger' : 'text-terminal-primary'}`}>
+                      {formatBytes(Number(stats.memory.used || 0))} / {formatBytes(Number(stats.memory.total || 0))}
                     </span>
                   </div>
                   <div className="w-full bg-terminal-border h-2">
                     <div
-                      className={`h-2 transition-all duration-500 ${(stats.memory.usage || 0) > 90 ? 'bg-terminal-danger' : 'bg-terminal-accent'}`}
-                      style={{ width: `${(stats.memory.usage || 0)}%` }}
+                      className={`h-2 transition-all duration-500 ${Number(stats.memory.usage || 0) > 90 ? 'bg-terminal-danger' : 'bg-terminal-accent'}`}
+                      style={{ width: `${Number(stats.memory.usage || 0)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -155,14 +155,14 @@ const Dashboard: React.FC = () => {
                 <div>
                   <div className="flex justify-between mb-1 text-terminal-secondary">
                     <span>DISK SPACE</span>
-                    <span className={`${(stats.disk.usage || 0) > 90 ? 'text-terminal-danger' : 'text-terminal-primary'}`}>
-                      {formatBytes(stats.disk.used)} / {formatBytes(stats.disk.total)}
+                    <span className={`${Number(stats.disk.usage || 0) > 90 ? 'text-terminal-danger' : 'text-terminal-primary'}`}>
+                      {formatBytes(Number(stats.disk.used || 0))} / {formatBytes(Number(stats.disk.total || 0))}
                     </span>
                   </div>
                   <div className="w-full bg-terminal-border h-2">
                     <div
-                      className={`h-2 transition-all duration-500 ${(stats.disk.usage || 0) > 90 ? 'bg-terminal-danger' : 'bg-terminal-primary'}`}
-                      style={{ width: `${(stats.disk.usage || 0)}%` }}
+                      className={`h-2 transition-all duration-500 ${Number(stats.disk.usage || 0) > 90 ? 'bg-terminal-danger' : 'bg-terminal-primary'}`}
+                      style={{ width: `${Number(stats.disk.usage || 0)}%` }}
                     ></div>
                   </div>
                 </div>

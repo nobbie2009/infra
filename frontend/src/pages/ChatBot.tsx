@@ -144,16 +144,16 @@ export default function ChatBotPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-terminal-bg">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
+      <div className="bg-terminal-surface border-b border-terminal-border px-6 py-4 shadow-terminal-glow">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-lg">
-            <MessageCircle className="w-6 h-6 text-white" />
+          <div className="bg-terminal-primary text-terminal-bg p-2">
+            <MessageCircle className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Infrastructure ChatBot</h1>
-            <p className="text-sm text-gray-600">
+            <h1 className="text-2xl font-bold text-terminal-primary font-mono text-glow section-header">Infrastructure ChatBot</h1>
+            <p className="text-sm text-terminal-secondary font-mono">
               Ask me about your infrastructure: VMs, services, logs, metrics, and more!
             </p>
           </div>
@@ -162,28 +162,29 @@ export default function ChatBotPage() {
 
       {/* Error Alert */}
       {error && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 mx-4 mt-4">
+        <div className="bg-terminal-surface border-l-4 border-terminal-danger p-4 mx-4 mt-4">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-700">{error}</p>
+            <AlertCircle className="w-5 h-5 text-terminal-danger flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-terminal-danger font-mono">[ ERROR ] {error}</p>
           </div>
         </div>
       )}
 
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 font-mono">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">
-                Start a conversation! Try asking:
+              <MessageCircle className="w-16 h-16 text-terminal-muted mx-auto mb-4" />
+              <p className="text-terminal-secondary text-lg font-mono">
+                [ INITIALIZING CHAT INTERFACE ]
               </p>
-              <ul className="mt-4 space-y-2 text-gray-600 text-sm">
-                <li>✓ "Sind alle Services okay?"</li>
-                <li>✓ "Zeig mir alle VMs"</li>
-                <li>✓ "Warum ist DB langsam?"</li>
-                <li>✓ "Restart VM-108"</li>
+              <p className="text-terminal-muted mt-2">Try asking:</p>
+              <ul className="mt-4 space-y-2 text-terminal-secondary text-sm font-mono">
+                <li>&gt; "Sind alle Services okay?"</li>
+                <li>&gt; "Zeig mir alle VMs"</li>
+                <li>&gt; "Warum ist DB langsam?"</li>
+                <li>&gt; "Restart VM-108"</li>
               </ul>
             </div>
           </div>
@@ -194,10 +195,10 @@ export default function ChatBotPage() {
             ))}
             {isLoading && (
               <div className="flex items-start gap-3 mb-4">
-                <div className="bg-blue-100 rounded-lg p-3 max-w-md">
-                  <div className="flex items-center gap-2 text-blue-700">
+                <div className="bg-terminal-surface border border-terminal-primary p-3 max-w-md">
+                  <div className="flex items-center gap-2 text-terminal-primary animate-flicker">
                     <Loader className="w-4 h-4 animate-spin" />
-                    <span className="text-sm">ChatBot is thinking...</span>
+                    <span className="text-sm font-mono">[ PROCESSING ]</span>
                   </div>
                 </div>
               </div>
@@ -218,27 +219,27 @@ export default function ChatBotPage() {
       )}
 
       {/* Input Area */}
-      <div className="bg-white border-t border-gray-200 px-6 py-4">
+      <div className="bg-terminal-surface border-t border-terminal-border px-6 py-4">
         <div className="flex gap-3">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && !isLoading && sendQuery()}
-            placeholder="Ask me about your infrastructure..."
+            placeholder="[ QUERY ]"
             disabled={isLoading || !sessionId}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="input-terminal flex-1"
           />
           <button
             onClick={sendQuery}
             disabled={isLoading || !input.trim() || !sessionId}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-colors"
+            className="btn-terminal"
           >
             <Send className="w-5 h-5" />
-            <span className="hidden sm:inline">Send</span>
+            <span className="hidden sm:inline">[ SEND ]</span>
           </button>
         </div>
-        <p className="text-xs text-gray-500 mt-2">
-          Hint: You can ask about VMs, services, logs, metrics, and create features!
+        <p className="text-xs text-terminal-muted mt-2 font-mono">
+          # Ask about VMs, services, logs, metrics, or create features
         </p>
       </div>
     </div>

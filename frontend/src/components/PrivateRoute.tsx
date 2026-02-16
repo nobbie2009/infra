@@ -15,10 +15,10 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-terminal-bg">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-terminal-primary mx-auto mb-4"></div>
+          <p className="text-terminal-muted font-mono">[ loading... ]</p>
         </div>
       </div>
     );

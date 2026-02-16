@@ -46,56 +46,53 @@ const Alerts: React.FC = () => {
 
     const getSeverityColor = (s: string) => {
         switch (s) {
-            case 'critical': return 'bg-red-50 text-red-700 border-red-200';
-            case 'warning': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
-            default: return 'bg-blue-50 text-blue-700 border-blue-200';
+            case 'critical': return 'border-terminal-danger text-terminal-danger';
+            case 'warning': return 'border-terminal-warning text-terminal-warning';
+            default: return 'border-terminal-primary text-terminal-primary';
         }
     };
 
     if (loading && alerts.length === 0) {
-        return <div className="p-8 text-center text-gray-500">Lade Alerts...</div>;
+        return <div className="p-8 text-center text-terminal-muted font-mono">[ loading alerts... ]</div>;
     }
 
     return (
-        <div className="p-6 max-w-7xl mx-auto">
-            <h1 className="text-3xl font-black text-gray-900 mb-6 flex items-center gap-3">
-                🔔 System Alerts
-                <span className="bg-gray-100 text-gray-600 px-3 py-1 text-sm rounded-full">{alerts.length}</span>
-            </h1>
+        <div className="p-6 max-w-7xl mx-auto bg-terminal-bg min-h-screen">
+            <h1 className="text-3xl font-black text-terminal-primary text-glow section-header mb-8">SYSTEM ALERTS [ {alerts.length} ]</h1>
 
             <div className="space-y-4">
                 {alerts.length === 0 ? (
-                    <div className="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
-                        <div className="text-6xl mb-4">✅</div>
-                        <h3 className="text-xl font-bold text-gray-700">Alles ruhig!</h3>
-                        <p className="text-gray-500">Keine aktiven Warnungen im System.</p>
+                    <div className="text-center py-16 card-terminal border-dashed">
+                        <div className="text-5xl mb-4">[ OK ]</div>
+                        <h3 className="text-lg font-bold text-terminal-primary">ALLES RUHIG</h3>
+                        <p className="text-terminal-muted font-mono text-sm mt-2">keine aktiven warnungen im system</p>
                     </div>
                 ) : (
                     alerts.map(alert => (
-                        <div key={alert.id} className={`p-6 rounded-2xl border ${getSeverityColor(alert.severity)} shadow-sm transition-all hover:shadow-md flex justify-between items-start gap-4`}>
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-1">
-                                    <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-black tracking-wider border ${getSeverityColor(alert.severity)}`}>
-                                        {alert.severity}
+                        <div key={alert.id} className={`p-4 border-l-4 ${getSeverityColor(alert.severity)} card-terminal hover:shadow-terminal-glow transition-all flex justify-between items-start gap-4`}>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                    <span className={`px-2 py-0.5 text-xs uppercase font-bold tracking-wider border ${getSeverityColor(alert.severity)}`}>
+                                        [ {alert.severity.toUpperCase()} ]
                                     </span>
-                                    <span className="text-xs font-mono text-gray-500">{new Date(alert.created_at).toLocaleString()}</span>
+                                    <span className="text-xs font-mono text-terminal-muted">{new Date(alert.created_at).toLocaleString()}</span>
                                     {alert.status === 'acknowledged' && (
-                                        <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full font-bold">👀 Gesehen</span>
+                                        <span className="text-xs border border-terminal-accent text-terminal-accent px-2 py-0.5 font-mono">[ SEEN ]</span>
                                     )}
                                 </div>
-                                <h3 className="font-bold text-lg mb-2">{alert.title}</h3>
-                                <p className="text-sm opacity-90 leading-relaxed font-mono bg-white/50 p-3 rounded-lg border border-black/5">
+                                <h3 className="font-bold text-terminal-primary mb-2">{alert.title}</h3>
+                                <p className="text-sm leading-relaxed font-mono text-terminal-secondary bg-terminal-surface/50 p-2 border border-terminal-border">
                                     {alert.message}
                                 </p>
-                                <div className="mt-2 text-xs font-bold opacity-60">Source: {alert.source}</div>
+                                <div className="mt-2 text-xs font-mono text-terminal-muted">src: {alert.source}</div>
                             </div>
 
                             {alert.status === 'active' && (
                                 <button
                                     onClick={() => acknowledgeAlert(alert.id)}
-                                    className="px-4 py-2 bg-white/80 hover:bg-white text-sm font-bold rounded-xl border border-black/10 shadow-sm transition-all active:scale-95"
+                                    className="btn-terminal text-xs whitespace-nowrap"
                                 >
-                                    Bestätigen
+                                    ACK
                                 </button>
                             )}
                         </div>

@@ -105,46 +105,46 @@ const CredentialsVault: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-terminal-bg min-h-screen">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">🔐 Credentials Vault</h1>
-          <p className="text-gray-600 mt-2">Securely store and manage your API credentials</p>
+          <h1 className="text-4xl font-bold text-terminal-primary font-mono text-glow section-header">🔐 CREDENTIALS VAULT</h1>
+          <p className="text-terminal-secondary mt-2 font-mono">[ SECURE CREDENTIAL STORAGE SYSTEM ]</p>
         </div>
 
         {/* Add Button */}
         <button
           onClick={() => setShowForm(!showForm)}
-          className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          className="btn-terminal mb-6"
         >
-          + Add Credential
+          [ + ADD CREDENTIAL ]
         </button>
 
         {/* Form */}
         {showForm && (
-          <div className="bg-white rounded-lg shadow mb-6 p-6">
-            <h2 className="text-xl font-bold mb-4">Add New Credential</h2>
+          <div className="card-terminal mb-6">
+            <h2 className="text-xl font-bold mb-4 text-terminal-primary font-mono">[ NEW CREDENTIAL ]</h2>
             <form onSubmit={handleAddCredential} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Name</label>
+                  <label className="block text-terminal-secondary font-medium mb-2 font-mono">[ NAME ]</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+                    className="input-terminal"
                     placeholder="e.g., My Proxmox"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">Type</label>
+                  <label className="block text-terminal-secondary font-medium mb-2 font-mono">[ TYPE ]</label>
                   <select
                     value={formData.type}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    className="input-terminal"
                   >
                     <option value="proxmox">Proxmox</option>
                     <option value="github">GitHub</option>
@@ -157,36 +157,36 @@ const CredentialsVault: React.FC = () => {
               {formData.type === 'proxmox' && (
                 <>
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">Proxmox Endpoint</label>
+                    <label className="block text-terminal-secondary font-medium mb-2 font-mono">[ PROXMOX ENDPOINT ]</label>
                     <input
                       type="url"
                       value={formData.endpoint}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, endpoint: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="input-terminal"
                       placeholder="https://proxmox.local:8006/api2/json"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">API Token</label>
+                    <label className="block text-terminal-secondary font-medium mb-2 font-mono">[ API TOKEN ]</label>
                     <input
                       type="password"
                       value={formData.token}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, token: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="input-terminal"
                       placeholder="user@pam!token=secret"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">Node (optional)</label>
+                    <label className="block text-terminal-secondary font-medium mb-2 font-mono">[ NODE (OPTIONAL) ]</label>
                     <input
                       type="text"
                       value={formData.node}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, node: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      className="input-terminal"
                       placeholder="pve"
                     />
                   </div>
@@ -195,27 +195,27 @@ const CredentialsVault: React.FC = () => {
 
               {formData.type === 'github' && (
                 <div>
-                  <label className="block text-gray-700 font-medium mb-2">GitHub Personal Access Token (PAT)</label>
+                  <label className="block text-terminal-secondary font-medium mb-2 font-mono">[ GITHUB PAT ]</label>
                   <input
                     type="password"
                     value={formData.token}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, token: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+                    className="input-terminal"
                     placeholder="ghp_xxxxxxxxxxxx"
                     required
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Needed for private repositories. Create one in Settings {'>'} Developer settings {'>'} Personal access tokens.
+                  <p className="text-xs text-terminal-muted mt-1 font-mono">
+                    # Settings {'>>'} Developer settings {'>>'} Personal access tokens
                   </p>
                 </div>
               )}
 
               <div>
-                <label className="block text-gray-700 font-medium mb-2">Description (optional)</label>
+                <label className="block text-terminal-secondary font-medium mb-2 font-mono">[ DESCRIPTION (OPTIONAL) ]</label>
                 <textarea
                   value={formData.description}
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600"
+                  className="input-terminal"
                   placeholder="Notes about this credential"
                   rows={2}
                 />
@@ -224,16 +224,16 @@ const CredentialsVault: React.FC = () => {
               <div className="flex gap-2">
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                  className="btn-terminal"
                 >
-                  Save Credential
+                  [ SAVE ]
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+                  className="btn-terminal"
                 >
-                  Cancel
+                  [ CANCEL ]
                 </button>
               </div>
             </form>
@@ -241,53 +241,53 @@ const CredentialsVault: React.FC = () => {
         )}
 
         {/* Credentials List */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="card-terminal overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-gray-500">Loading credentials...</div>
+            <div className="p-8 text-center text-terminal-muted font-mono">[ LOADING CREDENTIALS... ]</div>
           ) : credentials.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">No credentials yet</div>
+            <div className="p-8 text-center text-terminal-muted font-mono">[ NO CREDENTIALS FOUND ]</div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-100 border-b">
+              <table className="table-terminal">
+                <thead>
                   <tr>
-                    <th className="px-6 py-3 text-left font-semibold">Name</th>
-                    <th className="px-6 py-3 text-left font-semibold">Type</th>
-                    <th className="px-6 py-3 text-left font-semibold">Created</th>
-                    <th className="px-6 py-3 text-left font-semibold">Last Used</th>
-                    <th className="px-6 py-3 text-right font-semibold">Actions</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Created</th>
+                    <th>Last Used</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {credentials.map((cred: Credential) => (
-                    <tr key={cred.id} className="border-b hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium">{cred.name}</td>
-                      <td className="px-6 py-4">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                          {cred.type}
+                    <tr key={cred.id}>
+                      <td className="font-medium">{cred.name}</td>
+                      <td>
+                        <span className="px-2 py-1 bg-terminal-border text-terminal-primary rounded text-sm font-mono border border-terminal-primary">
+                          [ {cred.type.toUpperCase()} ]
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="text-terminal-secondary">
                         {new Date(cred.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="text-terminal-secondary">
                         {cred.last_used ? new Date(cred.last_used).toLocaleString() : '—'}
                       </td>
-                      <td className="px-6 py-4 text-right space-x-2">
+                      <td className="text-right space-x-2">
                         {(cred.type === 'proxmox' || cred.type === 'github') && (
                           <button
                             onClick={() => handleTestConnection(cred.id)}
                             disabled={testingId === cred.id}
-                            className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 disabled:opacity-50"
+                            className="btn-terminal text-xs"
                           >
-                            {testingId === cred.id ? '⏳ Testing...' : '✓ Test'}
+                            {testingId === cred.id ? '[ TESTING ]' : '[ TEST ]'}
                           </button>
                         )}
                         <button
                           onClick={() => handleDeleteCredential(cred.id)}
-                          className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                          className="btn-terminal text-xs border-terminal-danger text-terminal-danger hover:bg-terminal-danger hover:text-terminal-bg"
                         >
-                          Delete
+                          [ DELETE ]
                         </button>
                       </td>
                     </tr>

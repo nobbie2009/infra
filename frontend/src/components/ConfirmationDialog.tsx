@@ -17,48 +17,44 @@ export default function ConfirmationDialog({
   isLoading = false,
 }: ConfirmationDialogProps) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6">
+    <div className="fixed inset-0 bg-terminal-bg/80 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="card-terminal shadow-terminal-glow-strong max-w-md w-full mx-4">
         {/* Header */}
-        <div className="flex items-start gap-3 mb-4">
-          <div className="bg-yellow-100 p-2 rounded-full flex-shrink-0">
-            <AlertCircle className="w-5 h-5 text-yellow-600" />
+        <div className="flex items-start gap-3 mb-4 pb-4 border-b border-terminal-border">
+          <div className="border-2 border-terminal-warning p-2 flex-shrink-0">
+            <AlertCircle className="w-5 h-5 text-terminal-warning" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">{title}</h2>
-            <p className="text-sm text-gray-600">Requires confirmation</p>
+            <h2 className="text-sm font-bold text-terminal-warning uppercase tracking-wider">{title}</h2>
+            <p className="text-xs text-terminal-muted font-mono mt-1">requires confirmation</p>
           </div>
         </div>
 
         {/* Description */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <p className="text-sm text-gray-700 font-mono">{description}</p>
+        <div className="bg-terminal-surface/50 p-3 border border-terminal-border mb-4">
+          <p className="text-xs text-terminal-secondary font-mono">{description}</p>
         </div>
 
         {/* Warning Message */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-6">
-          <p className="text-sm text-yellow-800">
-            ⚠️ This action will be executed. Make sure you have reviewed the details above.
-          </p>
+        <div className="border-l-4 border-terminal-warning bg-terminal-bg p-3 mb-6 font-mono text-xs text-terminal-warning">
+          [ WARNING ] this action will be executed. review details above.
         </div>
 
         {/* Buttons */}
-        <div className="flex gap-3 justify-end">
+        <div className="flex gap-3 justify-end border-t border-terminal-border pt-4">
           <button
             onClick={onCancel}
             disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-terminal text-xs"
           >
-            <X className="w-4 h-4" />
-            Cancel
+            [ CANCEL ]
           </button>
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-terminal border-terminal-danger text-terminal-danger text-xs hover:bg-terminal-danger hover:text-terminal-bg"
           >
-            <Check className="w-4 h-4" />
-            {isLoading ? 'Executing...' : 'Confirm'}
+            {isLoading ? '[ ... ]' : '[ CONFIRM ]'}
           </button>
         </div>
       </div>

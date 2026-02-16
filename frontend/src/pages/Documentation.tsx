@@ -44,40 +44,40 @@ const Documentation: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'deployment' | 'api'>('deployment');
 
     return (
-        <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-gray-900">System Documentation</h1>
+        <div className="space-y-6 p-6 bg-terminal-bg min-h-screen">
+            <h1 className="text-3xl font-bold text-terminal-primary text-glow section-header">DOCUMENTATION</h1>
 
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-                <div className="border-b border-gray-200">
-                    <nav className="-mb-px flex">
-                        <button
-                            onClick={() => setActiveTab('deployment')}
-                            className={`w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm ${activeTab === 'deployment'
-                                    ? 'border-indigo-500 text-indigo-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                        >
-                            Deployment & Recovery
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('api')}
-                            className={`w-1/2 py-4 px-1 text-center border-b-2 font-medium text-sm ${activeTab === 'api'
-                                    ? 'border-indigo-500 text-indigo-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
-                        >
-                            API Reference
-                        </button>
-                    </nav>
+            <div className="card-terminal overflow-hidden">
+                <div className="border-b border-terminal-border flex divide-x divide-terminal-border">
+                    <button
+                        onClick={() => setActiveTab('deployment')}
+                        className={`flex-1 py-3 px-2 text-center font-mono text-sm uppercase tracking-wider ${activeTab === 'deployment'
+                                ? 'border-b-2 border-terminal-primary text-terminal-primary'
+                                : 'text-terminal-secondary hover:text-terminal-primary'
+                            }`}
+                    >
+                        [ DEPLOY ]
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('api')}
+                        className={`flex-1 py-3 px-2 text-center font-mono text-sm uppercase tracking-wider ${activeTab === 'api'
+                                ? 'border-b-2 border-terminal-primary text-terminal-primary'
+                                : 'text-terminal-secondary hover:text-terminal-primary'
+                            }`}
+                    >
+                        [ API ]
+                    </button>
                 </div>
 
-                <div className="p-6 prose max-w-none">
-                    <ReactMarkdown>
-                        {activeTab === 'deployment' ? DEPLOYMENT_DOCS : API_DOCS}
-                    </ReactMarkdown>
+                <div className="p-6 font-mono text-terminal-secondary text-sm overflow-auto max-h-[60vh]">
+                    <div className="prose prose-invert max-w-none [&_h1]:text-terminal-primary [&_h2]:text-terminal-accent [&_h3]:text-terminal-secondary [&_code]:bg-terminal-surface [&_code]:text-terminal-primary [&_pre]:bg-terminal-surface [&_pre]:border-terminal-border [&_li]:text-terminal-secondary [&_a]:text-terminal-accent [&_a]:hover:text-terminal-primary">
+                        <ReactMarkdown>
+                            {activeTab === 'deployment' ? DEPLOYMENT_DOCS : API_DOCS}
+                        </ReactMarkdown>
+                    </div>
                 </div>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
 

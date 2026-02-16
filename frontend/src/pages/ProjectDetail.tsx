@@ -153,17 +153,17 @@ const ProjectDetail: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-[calc(100vh-64px)]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="flex justify-center items-center h-[calc(100vh-64px)] bg-terminal-bg">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-terminal-primary"></div>
             </div>
         );
     }
 
     if (!project) {
         return (
-            <div className="p-6 text-center">
-                <h2 className="text-xl font-bold">Projekt nicht gefunden</h2>
-                <button onClick={() => navigate('/projects')} className="text-blue-600 mt-4 underline">Zurück zur Übersicht</button>
+            <div className="p-6 text-center bg-terminal-bg min-h-screen">
+                <h2 className="text-xl font-bold text-terminal-primary font-mono">[ PROJEKT NICHT GEFUNDEN ]</h2>
+                <button onClick={() => navigate('/projects')} className="text-terminal-secondary mt-4 underline font-mono">Zurück zur Übersicht</button>
             </div>
         );
     }

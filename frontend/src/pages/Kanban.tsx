@@ -140,20 +140,20 @@ const Kanban: React.FC = () => {
     }
 
     return (
-        <div className="h-[calc(100vh-64px)] overflow-hidden flex flex-col bg-gray-50/50">
-            <div className="px-8 py-6 flex justify-between items-center bg-white border-b border-gray-100 shadow-sm">
+        <div className="h-[calc(100vh-64px)] overflow-hidden flex flex-col bg-terminal-bg">
+            <div className="px-8 py-6 flex justify-between items-center bg-terminal-surface border-b border-terminal-border shadow-terminal-glow">
                 <div>
-                    <button onClick={() => navigate(`/projects/${projectId}`)} className="text-gray-400 hover:text-gray-600 text-sm mb-1">← Projekt Details</button>
-                    <h1 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-                        <span className="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm">KANBAN</span>
+                    <button onClick={() => navigate(`/projects/${projectId}`)} className="text-terminal-muted hover:text-terminal-secondary text-sm mb-1 font-mono">← PROJEKT DETAILS</button>
+                    <h1 className="text-2xl font-black text-terminal-primary flex items-center gap-3 font-mono text-glow">
+                        <span className="bg-terminal-primary text-terminal-bg px-3 py-1 text-sm">[ KANBAN ]</span>
                         {projectName}
                     </h1>
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="bg-gray-900 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-black transition-all shadow-lg active:scale-95"
+                    className="btn-terminal"
                 >
-                    + Feature hinzufügen
+                    [ + FEATURE HINZUFÜGEN ]
                 </button>
             </div>
 
@@ -165,8 +165,8 @@ const Kanban: React.FC = () => {
                                 <div className="flex items-center justify-between mb-4 px-2">
                                     <div className="flex items-center gap-3">
                                         <span className="text-xl">{col.icon}</span>
-                                        <h2 className="font-bold text-gray-600 uppercase tracking-widest text-xs">{col.title}</h2>
-                                        <span className="bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full text-[10px] font-black">
+                                        <h2 className="font-bold text-terminal-primary uppercase tracking-widest text-xs font-mono">[ {col.title} ]</h2>
+                                        <span className="bg-terminal-border text-terminal-primary px-2 py-0.5 border border-terminal-primary text-[10px] font-black font-mono">
                                             {features.filter(f => f.status === col.id).length}
                                         </span>
                                     </div>
@@ -177,7 +177,7 @@ const Kanban: React.FC = () => {
                                         <div
                                             {...provided.droppableProps}
                                             ref={provided.innerRef}
-                                            className={`flex-1 rounded-[2rem] p-4 transition-all border-2 border-transparent ${snapshot.isDraggingOver ? 'bg-blue-100/50 border-blue-200' : 'bg-gray-100/30'}`}
+                                            className={`flex-1 p-4 transition-all border-2 ${snapshot.isDraggingOver ? 'bg-terminal-surface border-terminal-primary' : 'bg-terminal-surface/50 border-terminal-border'}`}
                                         >
                                             <div className="space-y-4">
                                                 {features
@@ -189,22 +189,22 @@ const Kanban: React.FC = () => {
                                                                     ref={provided.innerRef}
                                                                     {...provided.draggableProps}
                                                                     {...provided.dragHandleProps}
-                                                                    className={`bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all group ${snapshot.isDragging ? 'rotate-2 scale-105 shadow-2xl !bg-white' : ''}`}
+                                                                    className={`bg-terminal-surface p-5 border border-terminal-border hover:shadow-terminal-glow hover:-translate-y-1 transition-all group ${snapshot.isDragging ? 'rotate-2 scale-105 shadow-terminal-glow-strong !bg-terminal-surface' : ''}`}
                                                                 >
                                                                     <div className="flex justify-between items-start mb-3">
-                                                                        <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider ${getPriorityColor(feature.priority)}`}>
-                                                                            {feature.priority}
+                                                                        <span className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-wider font-mono border ${getPriorityColor(feature.priority)}`}>
+                                                                            [ {feature.priority.toUpperCase()} ]
                                                                         </span>
                                                                         <div className="flex items-center gap-2">
                                                                             {feature.effort && (
-                                                                                <span className="text-[10px] text-gray-400 font-bold">⏱️ {feature.effort}h</span>
+                                                                                <span className="text-[10px] text-terminal-muted font-bold font-mono">⏱️ {feature.effort}h</span>
                                                                             )}
                                                                             <button
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
                                                                                     handleEditFeature(feature);
                                                                                 }}
-                                                                                className="text-gray-300 hover:text-green-500 transition-colors"
+                                                                                className="text-terminal-muted hover:text-terminal-primary transition-colors"
                                                                                 title="Feature bearbeiten"
                                                                             >
                                                                                 <span className="text-xs">✏️</span>
@@ -214,7 +214,7 @@ const Kanban: React.FC = () => {
                                                                                     e.stopPropagation();
                                                                                     navigate(`/prompts/generate/feature/${feature.id}`);
                                                                                 }}
-                                                                                className="text-gray-300 hover:text-blue-500 transition-colors"
+                                                                                className="text-terminal-muted hover:text-terminal-accent transition-colors"
                                                                                 title="AI Prompt generieren"
                                                                             >
                                                                                 <span className="text-xs">🤖</span>
@@ -226,21 +226,21 @@ const Kanban: React.FC = () => {
                                                                                         api.delete(`/features/${feature.id}`).then(() => loadData());
                                                                                     }
                                                                                 }}
-                                                                                className="text-gray-300 hover:text-red-500 transition-colors"
+                                                                                className="text-terminal-muted hover:text-terminal-danger transition-colors"
                                                                             >
                                                                                 <span className="text-xs">🗑️</span>
                                                                             </button>
                                                                         </div>
                                                                     </div>
-                                                                    <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors leading-snug">
+                                                                    <h3 className="font-bold text-terminal-primary group-hover:text-terminal-accent transition-colors leading-snug font-mono text-glow">
                                                                         {feature.name}
                                                                     </h3>
-                                                                    <p className="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed">
+                                                                    <p className="text-xs text-terminal-secondary mt-2 line-clamp-2 leading-relaxed font-mono">
                                                                         {feature.description}
                                                                     </p>
                                                                     {(feature as any).assignee && (
                                                                         <div className="mt-4 flex justify-end">
-                                                                            <div className="w-6 h-6 rounded-full bg-blue-600 text-[10px] flex items-center justify-center text-white font-bold ring-2 ring-white" title={(feature as any).assignee.username}>
+                                                                            <div className="w-6 h-6 bg-terminal-primary text-terminal-bg text-[10px] flex items-center justify-center font-bold border border-terminal-primary" title={(feature as any).assignee.username}>
                                                                                 {(feature as any).assignee.username.substring(0, 2).toUpperCase()}
                                                                             </div>
                                                                         </div>
@@ -262,33 +262,33 @@ const Kanban: React.FC = () => {
 
             {/* Add Feature Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white rounded-[2.5rem] p-10 max-w-lg w-full shadow-2xl border border-white/20">
-                        <h2 className="text-2xl font-black text-gray-900 mb-8">Neues Feature</h2>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-terminal-bg/80 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="card-terminal max-w-lg w-full shadow-terminal-glow-strong">
+                        <h2 className="text-2xl font-black text-terminal-primary mb-8 font-mono section-header">NEUES FEATURE</h2>
                         <form onSubmit={handleAddFeature} className="space-y-6">
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Titel</label>
+                                <label className="block text-xs font-black text-terminal-secondary uppercase tracking-widest mb-2 font-mono">[ TITEL ]</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-bold"
+                                    className="input-terminal"
                                     value={newFeature.name}
                                     onChange={(e) => setNewFeature({ ...newFeature, name: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Beschreibung</label>
+                                <label className="block text-xs font-black text-terminal-secondary uppercase tracking-widest mb-2 font-mono">[ BESCHREIBUNG ]</label>
                                 <textarea
-                                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all resize-none"
+                                    className="input-terminal resize-none"
                                     rows={3}
                                     value={newFeature.description}
                                     onChange={(e) => setNewFeature({ ...newFeature, description: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Priorität</label>
+                                <label className="block text-xs font-black text-terminal-secondary uppercase tracking-widest mb-2 font-mono">[ PRIORITÄT ]</label>
                                 <select
-                                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-bold appearance-none"
+                                    className="input-terminal appearance-none"
                                     value={newFeature.priority}
                                     onChange={(e) => setNewFeature({ ...newFeature, priority: e.target.value as any })}
                                 >
@@ -302,15 +302,15 @@ const Kanban: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={() => setShowModal(false)}
-                                    className="flex-1 py-4 font-bold text-gray-500 hover:text-gray-700 transition-colors"
+                                    className="btn-terminal flex-1"
                                 >
-                                    Abbrechen
+                                    [ ABBRECHEN ]
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95"
+                                    className="btn-terminal flex-1"
                                 >
-                                    Feature anlegen
+                                    [ ANLEGEN ]
                                 </button>
                             </div>
                         </form>
@@ -320,24 +320,24 @@ const Kanban: React.FC = () => {
 
             {/* Edit Feature Modal */}
             {showEditModal && editingFeature && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-white rounded-[2.5rem] p-10 max-w-lg w-full shadow-2xl border border-white/20">
-                        <h2 className="text-2xl font-black text-gray-900 mb-8">Feature bearbeiten</h2>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-terminal-bg/80 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="card-terminal max-w-lg w-full shadow-terminal-glow-strong">
+                        <h2 className="text-2xl font-black text-terminal-primary mb-8 font-mono section-header">FEATURE BEARBEITEN</h2>
                         <form onSubmit={handleSaveEdit} className="space-y-6">
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Titel</label>
+                                <label className="block text-xs font-black text-terminal-secondary uppercase tracking-widest mb-2 font-mono">[ TITEL ]</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-bold"
+                                    className="input-terminal"
                                     value={editingFeature.name}
                                     onChange={(e) => setEditingFeature({ ...editingFeature, name: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Beschreibung</label>
+                                <label className="block text-xs font-black text-terminal-secondary uppercase tracking-widest mb-2 font-mono">[ BESCHREIBUNG ]</label>
                                 <textarea
-                                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all resize-none"
+                                    className="input-terminal resize-none"
                                     rows={3}
                                     value={editingFeature.description}
                                     onChange={(e) => setEditingFeature({ ...editingFeature, description: e.target.value })}
@@ -345,9 +345,9 @@ const Kanban: React.FC = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Priorität</label>
+                                    <label className="block text-xs font-black text-terminal-secondary uppercase tracking-widest mb-2 font-mono">[ PRIORITÄT ]</label>
                                     <select
-                                        className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-bold appearance-none"
+                                        className="input-terminal appearance-none"
                                         value={editingFeature.priority}
                                         onChange={(e) => setEditingFeature({ ...editingFeature, priority: e.target.value as any })}
                                     >
@@ -358,12 +358,12 @@ const Kanban: React.FC = () => {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Aufwand (h)</label>
+                                    <label className="block text-xs font-black text-terminal-secondary uppercase tracking-widest mb-2 font-mono">[ AUFWAND (H) ]</label>
                                     <input
                                         type="number"
                                         min="0"
                                         step="0.5"
-                                        className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-bold"
+                                        className="input-terminal"
                                         value={editingFeature.effort || ''}
                                         onChange={(e) => setEditingFeature({ ...editingFeature, effort: e.target.value ? parseFloat(e.target.value) : undefined })}
                                     />
@@ -376,15 +376,15 @@ const Kanban: React.FC = () => {
                                         setShowEditModal(false);
                                         setEditingFeature(null);
                                     }}
-                                    className="flex-1 py-4 font-bold text-gray-500 hover:text-gray-700 transition-colors"
+                                    className="btn-terminal flex-1"
                                 >
-                                    Abbrechen
+                                    [ ABBRECHEN ]
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 py-4 bg-green-600 text-white rounded-2xl font-black shadow-lg shadow-green-200 hover:bg-green-700 transition-all active:scale-95"
+                                    className="btn-terminal flex-1"
                                 >
-                                    Speichern
+                                    [ SPEICHERN ]
                                 </button>
                             </div>
                         </form>
