@@ -127,29 +127,33 @@ const Projects: React.FC = () => {
                                 <span className="text-6? font-bold">#</span>
                             </div>
 
-                            <div className="flex justify-between items-start mb-4">
-                                <div></div>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handleSync(project.id)}
-                                        disabled={syncingId === project.id}
-                                        className={`px-4 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-colors ${syncingId === project.id ? 'animate-spin' : ''}`}
-                                        title="Von GitHub synchronisieren"
-                                    >
-                                        {syncingId === project.id ? '⏳ Wird synchronisiert...' : '🔄 Aktualisieren'}
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            navigate(`/projects/${project.id}`);
-                                            // Store state to open databases tab
-                                            sessionStorage.setItem('openDatabasesTab', 'true');
-                                        }}
-                                        className="px-4 py-2 rounded-lg bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors"
-                                        title="Direkt zur Datenbank"
-                                    >
-                                        🗄️ Datenbank
-                                    </button>
-                                </div>
+                            <div className="flex gap-2 mb-4 flex-wrap">
+                                <button
+                                    onClick={() => navigate(`/projects/${project.id}`)}
+                                    className="flex-1 min-w-[120px] px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-colors"
+                                    title="Projektübersicht öffnen"
+                                >
+                                    📂 Übersicht
+                                </button>
+                                <button
+                                    onClick={() => handleSync(project.id)}
+                                    disabled={syncingId === project.id}
+                                    className={`flex-1 min-w-[140px] px-3 py-2 rounded-lg bg-gray-100 text-gray-700 font-bold text-sm hover:bg-gray-200 transition-colors ${syncingId === project.id ? 'animate-spin' : ''}`}
+                                    title="Von GitHub synchronisieren"
+                                >
+                                    {syncingId === project.id ? '⏳ Sync...' : '🔄 Aktualisieren'}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        navigate(`/projects/${project.id}`);
+                                        // Store state to open databases tab
+                                        sessionStorage.setItem('openDatabasesTab', 'true');
+                                    }}
+                                    className="flex-1 min-w-[120px] px-3 py-2 rounded-lg bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-colors"
+                                    title="Direkt zur Datenbank"
+                                >
+                                    🗄️ DB
+                                </button>
                             </div>
 
                             <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
