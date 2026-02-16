@@ -149,8 +149,16 @@ export class IPManagementService {
   /**
    * Refresh VM IPs from Proxmox for all VMs
    */
-  async refreshVMIPsFromProxmox(): Promise<VM[]> {
+  async refreshVMIPsFromProxmox(userId: string): Promise<VM[]> {
     try {
+      // Ensure we are initialized
+      if (!this.proxmoxService.isInitialized()) {
+        const initialized = await this.proxmoxService.initialize(userId);
+        if (!initialized) {
+          throw new Error('Could not initialize Proxmox connection. Please check your credentials.');
+        }
+      }
+
       const vms = await this.vmRepository.find();
       const updatedVMs: VM[] = [];
 

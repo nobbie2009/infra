@@ -173,7 +173,7 @@ export class InfrastructureController {
         return;
       }
 
-      const updatedVMs = await this.ipManagementService.refreshVMIPsFromProxmox();
+      const updatedVMs = await this.ipManagementService.refreshVMIPsFromProxmox(req.user.id);
 
       logger.info(`User ${req.user.username} refreshed IPs for ${updatedVMs.length} VMs`, {
         userId: req.user.id,
