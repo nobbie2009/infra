@@ -34,46 +34,46 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-2xl w-full max-w-md p-8">
+    <div className="min-h-screen bg-terminal-bg flex items-center justify-center p-4">
+      <div className="card-terminal w-full max-w-md shadow-terminal-glow-strong">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">Infrastruktur-Manager</h1>
-          <p className="text-gray-600 mt-2">Manage your homelab infrastructure</p>
+          <h1 className="text-3xl font-bold text-terminal-primary text-glow-strong section-header">LOGIN</h1>
+          <p className="text-terminal-muted mt-2 font-mono">authenticate to continue</p>
         </div>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            {error}
+          <div className="mb-4 p-4 border border-terminal-danger text-terminal-danger rounded">
+            <span className="font-mono">[ERROR]</span> {error}
           </div>
         )}
 
         {formError && (
-          <div className="mb-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
-            {formError}
+          <div className="mb-4 p-4 border border-terminal-warning text-terminal-warning rounded">
+            <span className="font-mono">[WARN]</span> {formError}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Username</label>
+            <label className="block text-terminal-primary font-mono font-medium mb-2">[ USERNAME ]</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
-              placeholder="Enter your username"
+              className="input-terminal"
+              placeholder=">_ username"
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="block text-gray-700 font-medium mb-2">Password</label>
+            <label className="block text-terminal-primary font-mono font-medium mb-2">[ PASSWORD ]</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-gray-900"
-              placeholder="Enter your password"
+              className="input-terminal"
+              placeholder=">_ password"
               disabled={loading}
             />
           </div>
@@ -81,15 +81,15 @@ const Login: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="btn-terminal w-full font-mono uppercase"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? '[ AUTHENTICATING... ]' : '[ AUTHENTICATE ]'}
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-gray-300">
-          <p className="text-center text-gray-500 text-sm">
-            Infrastruktur-Manager v1.0
+        <div className="mt-6 pt-6 border-t border-terminal-border">
+          <p className="text-center text-terminal-muted text-sm font-mono">
+            INFRA-MANAGER v1.0
           </p>
         </div>
       </div>

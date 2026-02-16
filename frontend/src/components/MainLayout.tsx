@@ -30,17 +30,17 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-terminal-bg">
             {/* Header */}
-            <header className="bg-white shadow">
+            <header className="bg-terminal-surface border-b border-terminal-border">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                     <div className="flex items-center gap-8">
                         <div
                             className="cursor-pointer flex items-center gap-2"
                             onClick={() => navigate('/dashboard')}
                         >
-                            <span className="text-2xl">🏗️</span>
-                            <h1 className="text-xl font-bold text-gray-900 hidden sm:block">InfraManager</h1>
+                            <span className="text-2xl">⚙️</span>
+                            <h1 className="text-xl font-bold text-terminal-primary hidden sm:block text-glow">[ INFRA-MANAGER ]</h1>
                         </div>
 
                         <nav className="flex items-center gap-1 sm:gap-4">
@@ -48,9 +48,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                                 <button
                                     key={item.path}
                                     onClick={() => navigate(item.path)}
-                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${location.pathname === item.path
-                                        ? 'bg-blue-100 text-blue-700'
-                                        : 'text-gray-600 hover:bg-gray-100'
+                                    className={`px-3 py-2 text-sm font-mono font-medium transition flex items-center gap-2 border-l-4 ${location.pathname === item.path
+                                        ? 'bg-terminal-primary text-terminal-bg border-l-4 border-terminal-accent'
+                                        : 'text-terminal-secondary hover:bg-terminal-surface hover:text-terminal-primary border-l-4 border-transparent'
                                         }`}
                                 >
                                     <span>{item.icon}</span>
@@ -60,13 +60,13 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                             {user?.role === 'admin' && (
                                 <button
                                     onClick={() => navigate('/admin')}
-                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${location.pathname.startsWith('/admin')
-                                        ? 'bg-purple-100 text-purple-700'
-                                        : 'text-gray-600 hover:bg-gray-100'
+                                    className={`px-3 py-2 text-sm font-mono font-medium transition flex items-center gap-2 border-l-4 ${location.pathname.startsWith('/admin')
+                                        ? 'bg-terminal-warning text-terminal-bg border-l-4 border-terminal-accent'
+                                        : 'text-terminal-secondary hover:bg-terminal-surface hover:text-terminal-primary border-l-4 border-transparent'
                                         }`}
                                 >
                                     <span>🛡️</span>
-                                    <span className="hidden md:inline">Admin</span>
+                                    <span className="hidden md:inline">ADMIN</span>
                                 </button>
                             )}
                         </nav>
@@ -75,22 +75,21 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => navigate('/admin')}
-                            className="p-2 text-gray-400 hover:text-gray-500 relative"
+                            className="p-2 text-terminal-secondary hover:text-terminal-primary relative transition"
                             title="Alerts"
                         >
                             <span className="text-xl">🔔</span>
-                            {/* <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" /> */}
                         </button>
                         <div className="hidden md:block text-right">
-                            <p className="text-sm font-medium text-gray-900">{user?.username || 'User'}</p>
-                            <p className="text-xs text-gray-500">{user?.role || 'Guest'}</p>
+                            <p className="text-sm font-mono font-medium text-terminal-primary">[ {user?.username || 'USER'} ]</p>
+                            <p className="text-xs text-terminal-muted">{(user?.role || 'guest').toUpperCase()}</p>
                         </div>
                         <button
                             onClick={handleLogout}
                             disabled={loading}
-                            className="px-4 py-2 bg-red-50 text-red-600 border border-red-100 rounded-lg hover:bg-red-100 disabled:opacity-50 transition text-sm font-medium"
+                            className="px-4 py-2 border border-terminal-danger text-terminal-danger font-mono hover:bg-terminal-danger hover:text-terminal-bg disabled:opacity-50 transition text-sm font-medium uppercase"
                         >
-                            {loading ? '...' : 'Abmelden'}
+                            {loading ? '...' : 'Logout'}
                         </button>
                     </div>
                 </div>
