@@ -58,6 +58,11 @@ export class GitHubService {
                         token = decrypted.trim();
                     }
 
+                    // DEBUG: Check what we actually decrypted (safe log)
+                    logger.info(`[DEBUG] Decrypted token for ${credential.id} starts with: ${token ? token.substring(0, 4) + '***' : 'null'} (Length: ${token ? token.length : 0})`);
+
+                    // Validate token format - accept various GitHub token formats
+
                     // Validate token format - accept various GitHub token formats
                     // ghp_ = Personal Access Token (new format)
                     // gho_ = OAuth token
