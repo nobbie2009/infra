@@ -62,9 +62,12 @@ export class GitHubService {
                                 // ignore inner error
                             }
                         }
-                        // Case 1: Saved as object { token: "..." }
-                        if (data && typeof data === 'object' && data.token) {
-                            token = data.token;
+                        // Case 1: Saved as object { token: "..." } or { value: "..." }
+                        if (data && typeof data === 'object') {
+                            logger.info(`[DEBUG] Parsed data keys: ${Object.keys(data).join(', ')}`);
+                            if (data.token) token = data.token;
+                            else if (data.value) token = data.value;
+                            else if (data.accessToken) token = data.accessToken;
                         }
                         // Case 2: Saved as string "ghp_..." (double stringified)
                         else if (typeof data === 'string') {
