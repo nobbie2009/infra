@@ -281,12 +281,18 @@ export class HealthCheckService {
   /**
    * Get system statistics (CPU, RAM)
    */
+  /**
+   * Get system statistics (CPU, RAM, Disk)
+   */
   async getSystemStats(): Promise<any> {
     const cpus = os.cpus();
     const totalMem = os.totalmem();
     const freeMem = os.freemem();
     const usedMem = totalMem - freeMem;
     const loadAvg = os.loadavg();
+
+    const cpuUsage = await this.getCpuUsage();
+    const diskStats = await this.getDiskStats();
 
     return {
       hostname: os.hostname(),
@@ -295,16 +301,68 @@ export class HealthCheckService {
       cpu: {
         cores: cpus.length,
         model: cpus[0].model,
-        load: loadAvg[0], // 1 min avg
-        loadAvg: loadAvg
+        load: loadAvg,
+        usage: cpuUsage
       },
       memory: {
         total: totalMem,
         free: freeMem,
         used: usedMem,
-        percentage: Math.round((usedMem / totalMem) * 100),
-        percentUsed: Math.round((usedMem / totalMem) * 100)
-      }
+        usage: Math.round((usedMem / totalMem) * 100)
+      },
+      disk: diskStats
     };
+  }
+
+  private async getCpuUsage(): Promise<number> {
+    try {
+      // Simple CPU usage calculation based on load avg and cores as fallback
+      // Or simplified os.cpus() diff if I could persist state, but stateless is harder.
+      // For now, let's use a one-shot measurement of os.cpus() with a small delay?
+      // Actually, loadavg[0] / cores * 100 is a rough proxy for "saturation" on Linux.
+      // Let's try a better approach: generic /proc/stat read if linux
+      if (os.platform() === 'linux') {
+        const { stdout } = await execAsync('grep "cpu " /proc/stat');
+        const line = stdout.trim();
+        // cpu  user nice system idle ...
+        const parts = line.split(/\s+/);
+        // This is cumulative... needs two sample points. 
+        // Fallback to loadavg based approximation for stateless simplicity in this iteration
+        const cpus = os.cpus();
+        const load = os.loadavg()[0];
+        const usage = Math.min(100, Math.round((load / cpus.length) * 100));
+        return usage;
+      }
+      return 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  private async getDiskStats(): Promise<any> {
+    try {
+      if (os.platform() === 'linux') {
+        // Get disk usage for root partition
+        const { stdout } = await execAsync('df -B1 /');
+        // Filesystem     1B-blocks      Used Available Use% Mounted on
+        // /dev/root    50000000000 20000000000 30000000000  40% /
+        const lines = stdout.trim().split('\n');
+        if (lines.length >= 2) {
+          const parts = lines[1].split(/\s+/);
+          const total = parseInt(parts[1], 10);
+          const used = parseInt(parts[2], 10);
+          const free = parseInt(parts[3], 10);
+          return {
+            total,
+            used,
+            free,
+            usage: Math.round((used / total) * 100)
+          };
+        }
+      }
+      return { total: 0, used: 0, free: 0, usage: 0 };
+    } catch (e) {
+      return { total: 0, used: 0, free: 0, usage: 0 };
+    }
   }
 }
