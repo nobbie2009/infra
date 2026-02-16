@@ -18,54 +18,79 @@ export class GitHubService {
      */
     async initialize(userId: string): Promise<boolean> {
         try {
-            const credential = await this.credentialRepository.findOne({
-                where: { user_id: userId, type: CredentialType.GITHUB },
+            // Get the most recent GitHub credential (in case multiple exist)
+            const credentials = await this.credentialRepository.find({
+                where: { user_id: userId, type: CredentialType.GITHUB, is_deleted: false },
+                order: { updated_at: 'DESC' },
             });
 
-            if (!credential) {
+            if (!credentials || credentials.length === 0) {
                 logger.warn('No GitHub credential found for user', { userId });
                 return false;
             }
 
-            const masterKey = process.env.ENCRYPTION_MASTER_KEY;
-            if (!masterKey) {
-                logger.error('ENCRYPTION_MASTER_KEY not set');
-                return false;
+            // Try credentials from newest to oldest
+            for (const credential of credentials) {
+                const masterKey = process.env.ENCRYPTION_MASTER_KEY;
+                if (!masterKey) {
+                    logger.error('ENCRYPTION_MASTER_KEY not set');
+                    return false;
+                }
+
+                const decryptionInput: DecryptionInput = {
+                    encrypted: credential.encrypted_data,
+                    iv: credential.iv,
+                    salt: credential.salt,
+                    authTag: credential.auth_tag,
+                    masterKey,
+                };
+
+                let token: string | null = null;
+                try {
+                    const decrypted = decrypt(decryptionInput);
+
+                    // Try to parse as JSON first (format: {"token": "ghp_..."})
+                    try {
+                        const data = JSON.parse(decrypted);
+                        token = data.token || data;
+                    } catch {
+                        // If JSON parse fails, treat the whole decrypted string as token
+                        token = decrypted.trim();
+                    }
+
+                    // Validate token format
+                    if (!token || typeof token !== 'string' || !token.startsWith('ghp_')) {
+                        logger.warn(`Invalid token format in credential ${credential.id}`, { userId });
+                        continue; // Try next credential
+                    }
+
+                    logger.info(`Testing GitHub credential ${credential.id}`, { userId });
+                    this.client = new GitHubClient(token);
+                    const connected = await this.client.testConnection();
+
+                    if (connected) {
+                        credential.last_used = new Date();
+                        await this.credentialRepository.save(credential);
+                        logger.info('GitHub client initialized successfully', {
+                            credentialId: credential.id,
+                            userId,
+                        });
+                        return true;
+                    } else {
+                        logger.warn(`GitHub credential test failed: ${credential.id}`, { userId });
+                        continue; // Try next credential
+                    }
+                } catch (error) {
+                    logger.warn(`Failed to process GitHub credential ${credential.id}`, {
+                        error: String(error),
+                        userId,
+                    });
+                    continue; // Try next credential
+                }
             }
 
-            const decryptionInput: DecryptionInput = {
-                encrypted: credential.encrypted_data,
-                iv: credential.iv,
-                salt: credential.salt,
-                authTag: credential.auth_tag,
-                masterKey,
-            };
-
-            let token: string;
-            try {
-                const decrypted = decrypt(decryptionInput);
-                const data = JSON.parse(decrypted);
-                token = data.token;
-            } catch (error) {
-                logger.error('Failed to decrypt GitHub credential', { error: String(error) });
-                return false;
-            }
-
-            if (!token) {
-                logger.error('Invalid GitHub credential data: token missing');
-                return false;
-            }
-
-            this.client = new GitHubClient(token);
-            const connected = await this.client.testConnection();
-
-            if (connected) {
-                credential.last_used = new Date();
-                await this.credentialRepository.save(credential);
-                logger.info('GitHub client initialized successfully');
-            }
-
-            return connected;
+            logger.error('No valid GitHub credential found after testing all credentials', { userId });
+            return false;
         } catch (error) {
             logger.error('Failed to initialize GitHub client', { error: String(error) });
             return false;
