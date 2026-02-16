@@ -52,9 +52,19 @@ export class GitHubService {
                     // Try to parse as JSON first (format: {"token": "ghp_..."})
                     try {
                         const data = JSON.parse(decrypted);
-                        token = data.token || data;
+                        // Case 1: Saved as object { token: "..." }
+                        if (data && typeof data === 'object' && data.token) {
+                            token = data.token;
+                        }
+                        // Case 2: Saved as string "ghp_..." (double stringified)
+                        else if (typeof data === 'string') {
+                            token = data;
+                        } else {
+                            // Fallback
+                            token = decrypted.trim();
+                        }
                     } catch {
-                        // If JSON parse fails, treat the whole decrypted string as token
+                        // Not JSON, use as is
                         token = decrypted.trim();
                     }
 
