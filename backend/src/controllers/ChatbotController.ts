@@ -45,14 +45,12 @@ export class ChatbotController {
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey || apiKey.includes('YOUR-API-KEY')) {
-      logger.error('ANTHROPIC_API_KEY not configured or using placeholder');
-      throw new Error(
-        'ANTHROPIC_API_KEY environment variable is not configured. ' +
-        'Get your API key from https://console.anthropic.com and set it in .env'
-      );
+      logger.warn('ANTHROPIC_API_KEY not configured. ChatBot will not function.');
+      // Don't throw error to prevent server crash
+      this.claudeClient = null as any;
+    } else {
+      this.claudeClient = new Anthropic({ apiKey });
     }
-
-    this.claudeClient = new Anthropic({ apiKey });
   }
 
   private getSystemPrompt(): string {
@@ -89,8 +87,13 @@ Guidelines:
         { role: 'user', content: message },
       ];
 
+      if (!this.claudeClient) {
+        res.status(503).json({ success: false, message: 'ChatBot is not configured (Missing API Key)' });
+        return;
+      }
+
       const response = await this.claudeClient.messages.create({
-        model: 'claude-opus-4-6',
+        model: 'claude-3-5-sonnet-20240620',
         max_tokens: 1024,
         system: this.getSystemPrompt(),
         tools: CHATBOT_TOOLS as any,
