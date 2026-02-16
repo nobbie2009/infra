@@ -63,7 +63,8 @@ Guidelines:
 1. Be concise and helpful in responses
 2. Use available tools to gather information
 3. Format responses with Markdown
-4. Always consider security and safety`;
+4. Always consider security and safety
+5. Antworte und schreibe auf DEUTSCH`;
   }
 
   async query(req: AuthRequest, res: Response): Promise<void> {
