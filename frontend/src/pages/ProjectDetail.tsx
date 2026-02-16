@@ -169,30 +169,30 @@ const ProjectDetail: React.FC = () => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto p-6">
+        <div className="max-w-7xl mx-auto p-6 bg-terminal-bg min-h-screen">
             {/* Header */}
             <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <button
                         onClick={() => navigate('/projects')}
-                        className="text-gray-400 hover:text-gray-600 mb-4 flex items-center gap-2 transition-colors"
+                        className="text-terminal-muted hover:text-terminal-secondary mb-4 flex items-center gap-2 transition-colors font-mono"
                     >
-                        ← Zurück
+                        ← ZURÜCK
                     </button>
-                    <h1 className="text-4xl font-extrabold text-gray-900 leading-none">{project.name}</h1>
+                    <h1 className="text-4xl font-extrabold text-terminal-primary leading-none font-mono text-glow">{project.name}</h1>
                     <div className="flex items-center gap-4 mt-4">
                         {project.github_repo && (
                             <a
                                 href={`https://github.com/${project.github_repo}`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex items-center gap-2 text-sm text-gray-600 hover:text-black transition-colors bg-white px-3 py-1.5 rounded-full border border-gray-100 shadow-sm"
+                                className="flex items-center gap-2 text-sm text-terminal-secondary hover:text-terminal-primary transition-colors bg-terminal-surface px-3 py-1.5 border border-terminal-border shadow-terminal-glow font-mono"
                             >
                                 <span>🐙</span> {project.github_repo}
                             </a>
                         )}
-                        <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest ${project.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                            {project.status}
+                        <span className={`px-3 py-1.5 text-xs font-bold uppercase tracking-widest border font-mono ${project.status === 'active' ? 'bg-terminal-primary text-terminal-bg border-terminal-primary' : 'bg-terminal-surface text-terminal-muted border-terminal-muted'}`}>
+                            [ {project.status.toUpperCase()} ]
                         </span>
                     </div>
                 </div>
@@ -200,35 +200,35 @@ const ProjectDetail: React.FC = () => {
                 <div className="flex gap-3">
                     <button
                         onClick={() => navigate(`/projects/${id}/kanban`)}
-                        className="px-6 py-2.5 bg-white border border-gray-200 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm flex items-center gap-2"
+                        className="btn-terminal flex items-center gap-2"
                     >
-                        📋 Kanban
+                        📋 [ KANBAN ]
                     </button>
                     <button
                         onClick={() => setActiveTab('databases')}
-                        className={`px-6 py-2.5 rounded-xl font-bold transition-all shadow-sm flex items-center gap-2 ${
+                        className={`px-6 py-2.5 font-bold transition-all flex items-center gap-2 font-mono border ${
                             activeTab === 'databases'
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                                ? 'btn-terminal'
+                                : 'btn-terminal'
                         }`}
                     >
-                        🗄️ Datenbanken
+                        🗄️ [ DATENBANKEN ]
                     </button>
                     <button
                         onClick={() => setShowEditModal(true)}
-                        className="px-6 py-2.5 bg-white border border-gray-200 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+                        className="btn-terminal"
                     >
-                        Bearbeiten
+                        [ BEARBEITEN ]
                     </button>
                     <button
                         onClick={handleDelete}
-                        className="px-4 py-2.5 bg-red-50 text-red-600 rounded-xl font-bold hover:bg-red-100 transition-all"
+                        className="btn-terminal border-terminal-danger text-terminal-danger hover:bg-terminal-danger hover:text-terminal-bg"
                         title="Projekt löschen"
                     >
-                        🗑️
+                        [ LÖSCHEN ]
                     </button>
-                    <button className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
-                        Deploy
+                    <button className="btn-terminal">
+                        [ DEPLOY ]
                     </button>
                 </div>
             </div>
@@ -238,28 +238,28 @@ const ProjectDetail: React.FC = () => {
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-8">
                     {/* Description Card */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">Beschreibung</h2>
-                        <p className="text-gray-600 leading-relaxed text-lg">
-                            {project.description || 'Keine Beschreibung für dieses Projekt hinterlegt.'}
+                    <div className="card-terminal">
+                        <h2 className="text-lg font-bold text-terminal-primary mb-4 font-mono section-header">BESCHREIBUNG</h2>
+                        <p className="text-terminal-secondary leading-relaxed text-lg font-mono">
+                            {project.description || '[ KEINE BESCHREIBUNG HINTERLEGT ]'}
                         </p>
                     </div>
 
                     {/* README Section */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100">
-                        <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div className="card-terminal">
+                        <h2 className="text-lg font-bold text-terminal-primary mb-6 flex items-center gap-3 font-mono section-header">
                             📖 README.md
-                            <span className="text-xs font-normal text-gray-400 font-mono tracking-tighter">(Sync: {new Date(project.last_sync).toLocaleString()})</span>
+                            <span className="text-xs font-normal text-terminal-muted font-mono tracking-tighter">(Sync: {new Date(project.last_sync).toLocaleString()})</span>
                         </h2>
-                        <div className="prose prose-blue max-w-none bg-gray-50 p-6 rounded-2xl border border-gray-100 min-h-[300px]">
+                        <div className="max-w-none bg-terminal-surface p-6 border border-terminal-border min-h-[300px]">
                             {project.readme_content ? (
-                                <div className="whitespace-pre-wrap font-sans text-gray-800">
+                                <div className="whitespace-pre-wrap font-mono text-terminal-secondary text-sm">
                                     {project.readme_content}
                                 </div>
                             ) : (
-                                <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+                                <div className="flex flex-col items-center justify-center py-20 text-terminal-muted">
                                     <span className="text-4xl mb-4">📄</span>
-                                    <p>Keine README-Inhalte gefunden.</p>
+                                    <p className="font-mono">[ NO README CONTENT ]</p>
                                 </div>
                             )}
                         </div>
@@ -269,69 +269,69 @@ const ProjectDetail: React.FC = () => {
                 {/* Sidebar */}
                 <div className="space-y-8">
                     {/* Tech Stack Card */}
-                    <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-[2rem] p-8 text-white shadow-xl">
-                        <h2 className="text-lg font-bold mb-6">Tech Stack</h2>
+                    <div className="card-terminal bg-terminal-surface shadow-terminal-glow">
+                        <h2 className="text-lg font-bold text-terminal-primary mb-6 font-mono section-header">TECH STACK</h2>
                         <div className="flex flex-wrap gap-2">
                             {project.tech_stack?.length > 0 ? (
                                 project.tech_stack.map((tech: string) => (
-                                    <span key={tech} className="px-3 py-1.5 bg-white/10 rounded-xl text-sm font-medium border border-white/5 backdrop-blur-md">
-                                        {tech}
+                                    <span key={tech} className="px-3 py-1.5 bg-terminal-border text-terminal-primary text-sm font-medium border border-terminal-primary font-mono">
+                                        [ {tech} ]
                                     </span>
                                 ))
                             ) : (
-                                <p className="text-gray-400 text-sm">Keine Tech-Stack Daten.</p>
+                                <p className="text-terminal-muted text-sm font-mono">[ NO TECH STACK ]</p>
                             )}
                         </div>
                     </div>
 
                     {/* Stats/Metadata Card */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100">
-                        <h2 className="text-lg font-bold text-gray-900 mb-6">GitHub Stats</h2>
+                    <div className="card-terminal">
+                        <h2 className="text-lg font-bold text-terminal-primary mb-6 font-mono section-header">GITHUB STATS</h2>
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 bg-gray-50 rounded-2xl">
-                                <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-bold">Stars</p>
-                                <p className="text-2xl font-black text-gray-900">{project.metadata?.stars || 0}</p>
+                            <div className="p-4 bg-terminal-surface border border-terminal-border">
+                                <p className="text-xs text-terminal-muted mb-1 uppercase tracking-wider font-bold font-mono">[ STARS ]</p>
+                                <p className="text-2xl font-black text-terminal-primary font-mono">{project.metadata?.stars || 0}</p>
                             </div>
-                            <div className="p-4 bg-gray-50 rounded-2xl">
-                                <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-bold">Forks</p>
-                                <p className="text-2xl font-black text-gray-900">{project.metadata?.forks || 0}</p>
+                            <div className="p-4 bg-terminal-surface border border-terminal-border">
+                                <p className="text-xs text-terminal-muted mb-1 uppercase tracking-wider font-bold font-mono">[ FORKS ]</p>
+                                <p className="text-2xl font-black text-terminal-primary font-mono">{project.metadata?.forks || 0}</p>
                             </div>
-                            <div className="p-4 bg-gray-50 rounded-2xl">
-                                <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-bold">Issues</p>
-                                <p className="text-2xl font-black text-gray-900">{project.metadata?.open_issues || 0}</p>
+                            <div className="p-4 bg-terminal-surface border border-terminal-border">
+                                <p className="text-xs text-terminal-muted mb-1 uppercase tracking-wider font-bold font-mono">[ ISSUES ]</p>
+                                <p className="text-2xl font-black text-terminal-primary font-mono">{project.metadata?.open_issues || 0}</p>
                             </div>
-                            <div className="p-4 bg-gray-50 rounded-2xl">
-                                <p className="text-xs text-gray-500 mb-1 uppercase tracking-wider font-bold">Language</p>
-                                <p className="text-sm font-bold text-gray-900 truncate">{project.metadata?.language || 'N/A'}</p>
+                            <div className="p-4 bg-terminal-surface border border-terminal-border">
+                                <p className="text-xs text-terminal-muted mb-1 uppercase tracking-wider font-bold font-mono">[ LANG ]</p>
+                                <p className="text-sm font-bold text-terminal-primary truncate font-mono">{project.metadata?.language || 'N/A'}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Allocated VMs Card */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100">
+                    <div className="card-terminal">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-lg font-bold text-gray-900">Zugeordnete VMs</h2>
+                            <h2 className="text-lg font-bold text-terminal-primary font-mono section-header">VMS</h2>
                             <button
                                 onClick={loadAvailableVMs}
-                                className="text-blue-600 text-sm font-bold hover:underline"
+                                className="text-terminal-primary text-sm font-bold hover:text-terminal-accent font-mono"
                             >
-                                + Link
+                                [ + LINK ]
                             </button>
                         </div>
                         <div className="space-y-3">
                             {project.vms?.length > 0 ? (
                                 project.vms.map((vm: ProjectVM) => (
-                                    <div key={vm.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-2xl transition-colors border border-transparent hover:border-gray-100 group/vm">
+                                    <div key={vm.id} className="flex items-center justify-between p-3 hover:bg-terminal-surface transition-colors border border-terminal-border hover:border-terminal-primary group/vm">
                                         <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate(`/vms/${vm.id}`)}>
                                             <span className="text-xl">🖥️</span>
                                             <div>
-                                                <p className="font-bold text-gray-900 text-sm">{vm.name}</p>
-                                                <p className="text-[10px] text-gray-400">VMID: {vm.vmid} | Node: {vm.node}</p>
+                                                <p className="font-bold text-terminal-primary text-sm font-mono">{vm.name}</p>
+                                                <p className="text-[10px] text-terminal-muted font-mono">ID:{vm.vmid} | Node:{vm.node}</p>
                                             </div>
                                         </div>
                                         <button
                                             onClick={() => handleUnlinkVM(vm.id)}
-                                            className="opacity-0 group-hover/vm:opacity-100 p-2 text-gray-300 hover:text-red-500 transition-all"
+                                            className="opacity-0 group-hover/vm:opacity-100 p-2 text-terminal-muted hover:text-terminal-danger transition-all font-bold"
                                             title="Zuordnung entfernen"
                                         >
                                             ✕
@@ -339,8 +339,8 @@ const ProjectDetail: React.FC = () => {
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-center py-6 text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                    <p className="text-xs">Keine VMs zugeordnet.</p>
+                                <div className="text-center py-6 text-terminal-muted bg-terminal-surface border border-dashed border-terminal-border">
+                                    <p className="text-xs font-mono">[ NO VMS LINKED ]</p>
                                 </div>
                             )}
                         </div>
@@ -353,14 +353,14 @@ const ProjectDetail: React.FC = () => {
 
             {/* Link VM Modal */}
             {showLinkVMModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-[2.5rem] p-10 max-w-lg w-full shadow-2xl border border-white/20">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-8">VM zuordnen</h2>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-terminal-bg/80 backdrop-blur-sm">
+                    <div className="card-terminal max-w-lg w-full shadow-terminal-glow-strong">
+                        <h2 className="text-2xl font-bold text-terminal-primary mb-8 font-mono section-header">VM ZUORDNEN</h2>
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Verfügbare VMs</label>
+                                <label className="block text-sm font-semibold text-terminal-secondary mb-2 font-mono">[ VERFÜGBARE VMS ]</label>
                                 <select
-                                    className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none"
+                                    className="input-terminal appearance-none"
                                     value={selectedVMId}
                                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedVMId(e.target.value)}
                                 >
@@ -375,16 +375,16 @@ const ProjectDetail: React.FC = () => {
                             <div className="flex gap-4 pt-4">
                                 <button
                                     onClick={() => setShowLinkVMModal(false)}
-                                    className="flex-1 py-4 font-bold text-gray-500 hover:text-gray-700"
+                                    className="btn-terminal flex-1"
                                 >
-                                    Abbrechen
+                                    [ ABBRECHEN ]
                                 </button>
                                 <button
                                     onClick={handleLinkVM}
                                     disabled={!selectedVMId}
-                                    className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 disabled:opacity-50"
+                                    className="btn-terminal flex-1"
                                 >
-                                    Verknüpfen
+                                    [ VERKNÜPFEN ]
                                 </button>
                             </div>
                         </div>
@@ -394,44 +394,44 @@ const ProjectDetail: React.FC = () => {
 
             {/* Edit Modal */}
             {showEditModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
-                    <div className="bg-white rounded-[2.5rem] p-10 max-w-lg w-full shadow-2xl border border-white/20">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-8">Projekt bearbeiten</h2>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-terminal-bg/80 backdrop-blur-sm">
+                    <div className="card-terminal max-w-lg w-full shadow-terminal-glow-strong">
+                        <h2 className="text-2xl font-bold text-terminal-primary mb-8 font-mono section-header">PROJEKT BEARBEITEN</h2>
                         <form onSubmit={handleUpdate} className="space-y-6">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Projektname</label>
+                                <label className="block text-sm font-semibold text-terminal-secondary mb-2 font-mono">[ PROJEKTNAME ]</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                                    className="input-terminal"
                                     value={editData.name}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditData({ ...editData, name: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Beschreibung</label>
+                                <label className="block text-sm font-semibold text-terminal-secondary mb-2 font-mono">[ BESCHREIBUNG ]</label>
                                 <textarea
-                                    className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none resize-none"
+                                    className="input-terminal resize-none"
                                     rows={3}
                                     value={editData.description}
                                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditData({ ...editData, description: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2 font-black uppercase tracking-widest text-xs text-gray-400">GitHub Repo</label>
+                                <label className="block text-sm font-semibold text-terminal-secondary mb-2 font-mono uppercase text-xs">[ GITHUB REPO ]</label>
                                 <input
                                     type="text"
-                                    className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                                    className="input-terminal"
                                     placeholder="owner/repo"
                                     value={editData.github_repo}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditData({ ...editData, github_repo: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Tech Stack</label>
+                                <label className="block text-sm font-semibold text-terminal-secondary mb-2 font-mono">[ TECH STACK ]</label>
                                 <input
                                     type="text"
-                                    className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all"
+                                    className="input-terminal"
                                     placeholder="z.B. React, Node.js"
                                     value={editData.tech_stack}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditData({ ...editData, tech_stack: e.target.value })}
@@ -441,15 +441,15 @@ const ProjectDetail: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={() => setShowEditModal(false)}
-                                    className="flex-1 py-4 font-bold text-gray-500 hover:text-gray-700"
+                                    className="btn-terminal flex-1"
                                 >
-                                    Abbrechen
+                                    [ ABBRECHEN ]
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700"
+                                    className="btn-terminal flex-1"
                                 >
-                                    Speichern
+                                    [ SPEICHERN ]
                                 </button>
                             </div>
                         </form>

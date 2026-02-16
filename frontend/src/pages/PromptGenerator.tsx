@@ -51,24 +51,24 @@ const PromptGenerator: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="flex flex-col justify-center items-center h-[calc(100vh-64px)]">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-6"></div>
-                <p className="text-gray-500 font-medium animate-pulse">Analysiere Kontext & generiere Prompt...</p>
+            <div className="flex flex-col justify-center items-center h-[calc(100vh-64px)] bg-terminal-bg">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-terminal-primary mb-6"></div>
+                <p className="text-terminal-secondary font-medium animate-pulse font-mono">[ ANALYZING CONTEXT & GENERATING PROMPT ]</p>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="p-8 max-w-2xl mx-auto text-center">
-                <div className="bg-red-50 text-red-600 p-6 rounded-3xl border border-red-100 shadow-sm">
-                    <h2 className="text-xl font-bold mb-2">Fehler bei der Generierung</h2>
-                    <p>{error}</p>
+            <div className="p-8 max-w-2xl mx-auto text-center bg-terminal-bg min-h-screen">
+                <div className="card-terminal border-terminal-danger">
+                    <h2 className="text-xl font-bold mb-2 text-terminal-danger font-mono">[ ERROR ]</h2>
+                    <p className="text-terminal-secondary font-mono">{error}</p>
                     <button
                         onClick={() => navigate(-1)}
-                        className="mt-6 px-6 py-2 bg-white border border-red-200 text-red-700 rounded-xl font-bold hover:bg-red-50 transition-colors"
+                        className="btn-terminal mt-6"
                     >
-                        Zurück
+                        [ ZURÜCK ]
                     </button>
                 </div>
             </div>
@@ -76,39 +76,39 @@ const PromptGenerator: React.FC = () => {
     }
 
     return (
-        <div className="max-w-6xl mx-auto p-6 h-[calc(100vh-64px)] flex flex-col">
+        <div className="max-w-6xl mx-auto p-6 h-[calc(100vh-64px)] flex flex-col bg-terminal-bg">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-gray-600 text-sm mb-1 font-medium">← Zurück</button>
-                    <h1 className="text-3xl font-black text-gray-900 leading-tight">Prompt Generator 🤖</h1>
-                    <p className="text-gray-500">Kontext-basierter Prompt für AI-Assistenten</p>
+                    <button onClick={() => navigate(-1)} className="text-terminal-muted hover:text-terminal-secondary text-sm mb-1 font-medium font-mono">← ZURÜCK</button>
+                    <h1 className="text-3xl font-black text-terminal-primary leading-tight font-mono text-glow">PROMPT GENERATOR 🤖</h1>
+                    <p className="text-terminal-secondary font-mono">[ CONTEXT-BASED PROMPT GENERATION ]</p>
                 </div>
                 <div className="flex gap-3">
                     <button
                         onClick={generatePrompt}
-                        className="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                        className="btn-terminal"
                     >
-                        🔄 Regenerieren
+                        🔄 [ REGENERATE ]
                     </button>
                     <button
                         onClick={copyToClipboard}
-                        className={`px-6 py-2 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-95 flex items-center gap-2 ${copied ? 'bg-green-500 shadow-green-200' : 'bg-blue-600 shadow-blue-200 hover:bg-blue-700'
+                        className={`btn-terminal transition-all transform active:scale-95 flex items-center gap-2 ${copied ? 'border-terminal-primary bg-terminal-primary text-terminal-bg' : 'border-terminal-primary'
                             }`}
                     >
-                        {copied ? '✅ Kopiert!' : '📋 In Zwischenablage kopieren'}
+                        {copied ? '✅ [ COPIED ]' : '📋 [ COPY TO CLIPBOARD ]'}
                     </button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
                 {/* Prompt Preview */}
-                <div className="lg:col-span-2 flex flex-col min-h-0 bg-white rounded-[2rem] shadow-xl border border-gray-100 overflow-hidden">
-                    <div className="px-6 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
-                        <span className="font-bold text-gray-500 text-sm uppercase tracking-wider">Generated Output</span>
-                        <span className="text-xs text-gray-400 font-mono">{prompt.length} chars</span>
+                <div className="lg:col-span-2 flex flex-col min-h-0 card-terminal shadow-terminal-glow-strong overflow-hidden">
+                    <div className="px-6 py-4 bg-terminal-surface border-b border-terminal-border flex justify-between items-center">
+                        <span className="font-bold text-terminal-primary text-sm uppercase tracking-wider font-mono">[ GENERATED OUTPUT ]</span>
+                        <span className="text-xs text-terminal-muted font-mono">[ {prompt.length} CHARS ]</span>
                     </div>
-                    <div className="flex-1 overflow-auto p-6 bg-gray-50/30">
-                        <pre className="whitespace-pre-wrap font-mono text-sm text-gray-700 leading-relaxed max-w-none">
+                    <div className="flex-1 overflow-auto p-6 bg-terminal-surface">
+                        <pre className="whitespace-pre-wrap font-mono text-sm text-terminal-secondary leading-relaxed max-w-none">
                             {prompt}
                         </pre>
                     </div>
@@ -116,54 +116,54 @@ const PromptGenerator: React.FC = () => {
 
                 {/* Info / Metadata Sidebar */}
                 <div className="space-y-6 overflow-auto">
-                    <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100">
-                        <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            📊 Analysierter Kontext
+                    <div className="card-terminal">
+                        <h3 className="font-bold text-terminal-primary mb-4 flex items-center gap-2 font-mono section-header">
+                            📊 KONTEXT
                         </h3>
 
                         {contextData && contextData.feature && (
                             <div className="mb-6">
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Feature</p>
-                                <p className="font-bold text-gray-800">{contextData.feature.name}</p>
-                                <span className={`inline-block mt-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${contextData.feature.priority === 'critical' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
+                                <p className="text-xs font-bold text-terminal-muted uppercase tracking-wider mb-1 font-mono">[ FEATURE ]</p>
+                                <p className="font-bold text-terminal-primary font-mono">{contextData.feature.name}</p>
+                                <span className={`inline-block mt-1 px-2 py-0.5 text-[10px] font-black uppercase border font-mono ${contextData.feature.priority === 'critical' ? 'border-terminal-danger text-terminal-danger bg-terminal-surface' : 'border-terminal-primary text-terminal-primary bg-terminal-surface'
                                     }`}>
-                                    {contextData.feature.priority}
+                                    [ {contextData.feature.priority.toUpperCase()} ]
                                 </span>
                             </div>
                         )}
 
                         {contextData && contextData.project && (
                             <div className="mb-6">
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Projekt</p>
-                                <p className="font-bold text-gray-800">{contextData.project.name}</p>
-                                <p className="text-xs text-gray-500 mt-1 line-clamp-2">{contextData.project.techStack?.join(', ')}</p>
+                                <p className="text-xs font-bold text-terminal-muted uppercase tracking-wider mb-1 font-mono">[ PROJECT ]</p>
+                                <p className="font-bold text-terminal-primary font-mono">{contextData.project.name}</p>
+                                <p className="text-xs text-terminal-secondary mt-1 line-clamp-2 font-mono">{contextData.project.techStack?.join(', ')}</p>
                             </div>
                         )}
 
                         {contextData && contextData.infrastructure && (
                             <div>
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Infrastruktur</p>
+                                <p className="text-xs font-bold text-terminal-muted uppercase tracking-wider mb-2 font-mono">[ INFRASTRUCTURE ]</p>
                                 <div className="space-y-2">
                                     {contextData.infrastructure.map((vm: any, idx: number) => (
-                                        <div key={idx} className="bg-gray-50 p-2 rounded-lg border border-gray-100">
+                                        <div key={idx} className="bg-terminal-surface p-2 border border-terminal-border">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-xs font-bold text-gray-700">{vm.name}</span>
-                                                <span className="text-[10px] text-gray-400 font-mono">{vm.ip}</span>
+                                                <span className="text-xs font-bold text-terminal-primary font-mono">{vm.name}</span>
+                                                <span className="text-[10px] text-terminal-muted font-mono">{vm.ip}</span>
                                             </div>
                                         </div>
                                     ))}
                                     {contextData.infrastructure.length === 0 && (
-                                        <p className="text-xs text-gray-400 italic">Keine VMs verknüpft</p>
+                                        <p className="text-xs text-terminal-muted italic font-mono">[ NO VMS LINKED ]</p>
                                     )}
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-[2rem] p-6 text-white shadow-lg">
-                        <h3 className="font-bold mb-2">💡 Pro-Tipp</h3>
-                        <p className="text-sm opacity-90 leading-relaxed">
-                            Kopiere diesen Prompt und füge ihn direkt in ChatGPT oder Claude ein. Er enthält alle notwendigen technischen Details, damit der AI-Agent sofort mit der Implementierung beginnen kann.
+                    <div className="card-terminal bg-terminal-surface shadow-terminal-glow border-terminal-accent">
+                        <h3 className="font-bold text-terminal-accent mb-2 font-mono">💡 [ PRO TIP ]</h3>
+                        <p className="text-sm text-terminal-secondary leading-relaxed font-mono">
+                            Copy this prompt and paste it into ChatGPT or Claude. Contains all technical details for immediate implementation.
                         </p>
                     </div>
                 </div>
