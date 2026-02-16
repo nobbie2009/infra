@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
+import DatabasesTab from '../components/DatabasesTab';
 
 interface ProjectVM {
     id: string;
@@ -33,6 +34,7 @@ const ProjectDetail: React.FC = () => {
     const navigate = useNavigate();
     const [project, setProject] = useState<Project | null>(null);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<'overview' | 'databases'>('overview');
     const [showEditModal, setShowEditModal] = useState(false);
     const [editData, setEditData] = useState({
         name: '',
@@ -198,6 +200,16 @@ const ProjectDetail: React.FC = () => {
                         📋 Kanban
                     </button>
                     <button
+                        onClick={() => setActiveTab('databases')}
+                        className={`px-6 py-2.5 rounded-xl font-bold transition-all shadow-sm flex items-center gap-2 ${
+                            activeTab === 'databases'
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                        }`}
+                    >
+                        🗄️ Datenbanken
+                    </button>
+                    <button
                         onClick={() => setShowEditModal(true)}
                         className="px-6 py-2.5 bg-white border border-gray-200 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
                     >
@@ -216,6 +228,7 @@ const ProjectDetail: React.FC = () => {
                 </div>
             </div>
 
+            {activeTab === 'overview' ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-8">
@@ -329,6 +342,9 @@ const ProjectDetail: React.FC = () => {
                     </div>
                 </div>
             </div>
+            ) : (
+            <DatabasesTab projectId={id!} />
+            )}
 
             {/* Link VM Modal */}
             {showLinkVMModal && (

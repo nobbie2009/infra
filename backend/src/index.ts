@@ -24,6 +24,8 @@ import { VM } from './entities/VM.entity';
 import { Service } from './entities/Service.entity';
 import { Project } from './entities/Project.entity';
 import { Feature } from './entities/Feature.entity';
+import { ProjectDatabase } from './entities/ProjectDatabase.entity';
+import { DatabaseQueryLog } from './entities/DatabaseQueryLog.entity';
 import { ProjectController } from './controllers/ProjectController';
 import { ProjectService } from './services/ProjectService';
 import { FeatureController } from './controllers/FeatureController';
@@ -33,6 +35,9 @@ import { PromptService } from './services/PromptService';
 import { ContextCollectorService } from './services/ContextCollectorService';
 import { PromptsController } from './controllers/PromptsController';
 import { ChatbotController } from './controllers/ChatbotController';
+import { DatabaseController } from './controllers/DatabaseController';
+import { DatabaseQueryService } from './services/DatabaseQueryService';
+import rateLimiterMiddleware from './middleware/rateLimiter.middleware';
 import logger from './utils/logger';
 
 const app: Express = express();
@@ -112,6 +117,8 @@ async function bootstrap() {
     const serviceRepository = AppDataSource.getRepository(Service);
     const projectRepository = AppDataSource.getRepository(Project);
     const featureRepository = AppDataSource.getRepository(Feature);
+    const projectDatabaseRepository = AppDataSource.getRepository(ProjectDatabase);
+    const databaseQueryLogRepository = AppDataSource.getRepository(DatabaseQueryLog);
 
     const authController = new AuthController(userRepository);
     const proxmoxService = new ProxmoxService(credentialRepository);
@@ -138,6 +145,14 @@ async function bootstrap() {
 
     const projectService = new ProjectService(projectRepository, vmRepository, githubService);
     const projectController = new ProjectController(projectService);
+
+    const databaseQueryService = new DatabaseQueryService(projectDatabaseRepository, databaseQueryLogRepository);
+    const databaseController = new DatabaseController(
+      projectDatabaseRepository,
+      databaseQueryLogRepository,
+      projectRepository,
+      databaseQueryService
+    );
 
     const featureService = new FeatureService(featureRepository);
     const featureController = new FeatureController(featureService);
@@ -441,6 +456,82 @@ async function bootstrap() {
     );
 
     app.use('/api/projects', projectRoutes);
+
+    // Database Routes
+    const databaseRoutes = express.Router();
+
+    // Create database connection for a project
+    databaseRoutes.post(
+      '/projects/:projectId/databases',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => databaseController.createDatabase(req, res)
+    );
+
+    // List databases for a project
+    databaseRoutes.get(
+      '/projects/:projectId/databases',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => databaseController.listDatabases(req, res)
+    );
+
+    // Get single database
+    databaseRoutes.get(
+      '/:id',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => databaseController.getDatabase(req, res)
+    );
+
+    // Update database
+    databaseRoutes.put(
+      '/:id',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => databaseController.updateDatabase(req, res)
+    );
+
+    // Delete database
+    databaseRoutes.delete(
+      '/:id',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => databaseController.deleteDatabase(req, res)
+    );
+
+    // Test connection
+    databaseRoutes.post(
+      '/:id/test',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => databaseController.testConnection(req, res)
+    );
+
+    // Execute query (with rate limiting)
+    databaseRoutes.post(
+      '/:id/query',
+      jwtMiddleware.authenticate(userRepository),
+      rateLimiterMiddleware,
+      (req: AuthRequest, res: Response) => databaseController.executeQuery(req, res)
+    );
+
+    // List tables
+    databaseRoutes.get(
+      '/:id/tables',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => databaseController.listTables(req, res)
+    );
+
+    // Get table schema
+    databaseRoutes.get(
+      '/:id/tables/:tableName',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => databaseController.describeTable(req, res)
+    );
+
+    // Get query history
+    databaseRoutes.get(
+      '/:id/history',
+      jwtMiddleware.authenticate(userRepository),
+      (req: AuthRequest, res: Response) => databaseController.getQueryHistory(req, res)
+    );
+
+    app.use('/api/databases', databaseRoutes);
 
     // Feature Routes
     const featureRoutes = express.Router();
