@@ -131,12 +131,12 @@ const AdminDashboard: React.FC = () => {
                                 <div className="text-terminal-muted truncate text-xs">{stats.cpu.model}</div>
                                 <div className="flex justify-between mb-1 text-terminal-secondary">
                                     <span>load avg</span>
-                                    <span className="text-terminal-primary">{stats.cpu?.load?.toFixed(1) ?? '0.0'}%</span>
+                                    <span className="text-terminal-primary">{typeof stats.cpu?.load === 'number' ? stats.cpu.load.toFixed(1) : '0.0'}%</span>
                                 </div>
                                 <div className="w-full bg-terminal-border h-2">
                                     <div
                                         className="bg-terminal-accent h-2 transition-all"
-                                        style={{ width: `${Math.min(stats.cpu?.load ?? 0, 100)}%` }}
+                                        style={{ width: `${Math.min(typeof stats.cpu?.load === 'number' ? stats.cpu.load : 0, 100)}%` }}
                                     ></div>
                                 </div>
                             </div>
@@ -160,12 +160,12 @@ const AdminDashboard: React.FC = () => {
                                 </div>
                                 <div className="flex justify-between mb-1 text-terminal-secondary">
                                     <span>used</span>
-                                    <span className="text-terminal-primary">{stats.memory?.percentage?.toFixed(1) ?? '0.0'}%</span>
+                                    <span className="text-terminal-primary">{typeof stats.memory?.percentage === 'number' ? stats.memory.percentage.toFixed(1) : '0.0'}%</span>
                                 </div>
                                 <div className="w-full bg-terminal-border h-2">
                                     <div
-                                        className={`h-2 transition-all ${(stats.memory?.percentage ?? 0) > 80 ? 'bg-terminal-danger' : 'bg-terminal-primary'}`}
-                                        style={{ width: `${stats.memory?.percentage ?? 0}%` }}
+                                        className={`h-2 transition-all ${(typeof stats.memory?.percentage === 'number' ? stats.memory.percentage : 0) > 80 ? 'bg-terminal-danger' : 'bg-terminal-primary'}`}
+                                        style={{ width: `${typeof stats.memory?.percentage === 'number' ? stats.memory.percentage : 0}%` }}
                                     ></div>
                                 </div>
                             </div>
