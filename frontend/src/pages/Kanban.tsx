@@ -32,6 +32,8 @@ const Kanban: React.FC = () => {
     const [projectName, setProjectName] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [newFeature, setNewFeature] = useState({ name: '', description: '', priority: 'medium' as any });
+    const [editingFeature, setEditingFeature] = useState<Feature | null>(null);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     useEffect(() => {
         if (projectId) {
@@ -91,6 +93,32 @@ const Kanban: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to add feature:', error);
+        }
+    };
+
+    const handleEditFeature = (feature: Feature) => {
+        setEditingFeature(feature);
+        setShowEditModal(true);
+    };
+
+    const handleSaveEdit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingFeature) return;
+
+        try {
+            const response = await api.put(`/features/${editingFeature.id}`, {
+                name: editingFeature.name,
+                description: editingFeature.description,
+                priority: editingFeature.priority,
+                effort: editingFeature.effort,
+            });
+            if (response.data.success) {
+                setShowEditModal(false);
+                setEditingFeature(null);
+                loadData();
+            }
+        } catch (error) {
+            console.error('Failed to update feature:', error);
         }
     };
 
@@ -171,6 +199,16 @@ const Kanban: React.FC = () => {
                                                                             {feature.effort && (
                                                                                 <span className="text-[10px] text-gray-400 font-bold">⏱️ {feature.effort}h</span>
                                                                             )}
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    handleEditFeature(feature);
+                                                                                }}
+                                                                                className="text-gray-300 hover:text-green-500 transition-colors"
+                                                                                title="Feature bearbeiten"
+                                                                            >
+                                                                                <span className="text-xs">✏️</span>
+                                                                            </button>
                                                                             <button
                                                                                 onClick={(e) => {
                                                                                     e.stopPropagation();
@@ -273,6 +311,80 @@ const Kanban: React.FC = () => {
                                     className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95"
                                 >
                                     Feature anlegen
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Feature Modal */}
+            {showEditModal && editingFeature && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-[2.5rem] p-10 max-w-lg w-full shadow-2xl border border-white/20">
+                        <h2 className="text-2xl font-black text-gray-900 mb-8">Feature bearbeiten</h2>
+                        <form onSubmit={handleSaveEdit} className="space-y-6">
+                            <div>
+                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Titel</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-bold"
+                                    value={editingFeature.name}
+                                    onChange={(e) => setEditingFeature({ ...editingFeature, name: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Beschreibung</label>
+                                <textarea
+                                    className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all resize-none"
+                                    rows={3}
+                                    value={editingFeature.description}
+                                    onChange={(e) => setEditingFeature({ ...editingFeature, description: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Priorität</label>
+                                    <select
+                                        className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-bold appearance-none"
+                                        value={editingFeature.priority}
+                                        onChange={(e) => setEditingFeature({ ...editingFeature, priority: e.target.value as any })}
+                                    >
+                                        <option value="low">Niedrig</option>
+                                        <option value="medium">Mittel</option>
+                                        <option value="high">Hoch</option>
+                                        <option value="critical">Kritisch</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Aufwand (h)</label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.5"
+                                        className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-blue-100 outline-none transition-all font-bold"
+                                        value={editingFeature.effort || ''}
+                                        onChange={(e) => setEditingFeature({ ...editingFeature, effort: e.target.value ? parseFloat(e.target.value) : undefined })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowEditModal(false);
+                                        setEditingFeature(null);
+                                    }}
+                                    className="flex-1 py-4 font-bold text-gray-500 hover:text-gray-700 transition-colors"
+                                >
+                                    Abbrechen
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 py-4 bg-green-600 text-white rounded-2xl font-black shadow-lg shadow-green-200 hover:bg-green-700 transition-all active:scale-95"
+                                >
+                                    Speichern
                                 </button>
                             </div>
                         </form>
