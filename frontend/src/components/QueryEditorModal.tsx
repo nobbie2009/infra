@@ -199,7 +199,7 @@ const QueryEditorModal: React.FC<QueryEditorModalProps> = ({ database, onClose }
                   spellCheck={false}
                 />
                 <p className="text-xs text-gray-500">
-                  ⚠️ Nur SELECT-Abfragen erlaubt. Max. 1000 Zeilen. Timeout: 10s
+                  ✅ SELECT, INSERT, UPDATE, DELETE, ALTER, CREATE erlaubt | ⚠️ DROP, TRUNCATE blockiert | Max. Query: 10,000 Zeichen | Timeout: 10s
                 </p>
               </div>
 
